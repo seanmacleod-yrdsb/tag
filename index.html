@@ -3,99 +3,204 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Math Tag Park (2P)</title>
+  <title>Math Tag: Park & Space</title>
   <style>
-    html, body { height: 100%; margin: 0; background: #0b1b10; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    body { background: #06130b; overflow: hidden; }
+
     #wrap { height: 100%; display: grid; place-items: center; }
-    canvas { background: #0f2a18; border: 2px solid rgba(255,255,255,.12); border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    canvas {
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      width: min(1100px, calc(100vw - 18px));
+      height: auto;
+      max-height: calc(100vh - 18px);
+      background: #06130b;
+    }
+
     #ui {
       position: fixed; left: 14px; top: 12px; right: 14px;
       display: flex; gap: 12px; align-items: flex-start; justify-content: space-between;
-      pointer-events: none;
+      pointer-events: none; z-index: 5;
       color: rgba(255,255,255,.92);
-      text-shadow: 0 2px 12px rgba(0,0,0,.6);
+      text-shadow: 0 2px 12px rgba(0,0,0,.55);
       font-size: 14px;
     }
     .panel {
-      pointer-events: none;
-      background: rgba(0,0,0,.28);
+      background: rgba(0,0,0,.30);
       border: 1px solid rgba(255,255,255,.10);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 10px 12px;
-      backdrop-filter: blur(6px);
-      max-width: 520px;
+      max-width: 720px;
       line-height: 1.25;
+      backdrop-filter: blur(6px);
     }
-    .title { font-weight: 700; letter-spacing: .2px; margin-bottom: 6px; }
+    .title { font-weight: 900; margin-bottom: 6px; letter-spacing: .2px; }
     .kbd { display: inline-block; padding: 2px 6px; border-radius: 8px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.14); margin: 0 2px; }
-    #overlay {
+
+    .overlay {
       position: fixed; inset: 0;
       display: none;
       align-items: center; justify-content: center;
-      background: rgba(0,0,0,.55);
-      backdrop-filter: blur(6px);
-      z-index: 10;
+      background: rgba(0,0,0,.60);
+      backdrop-filter: blur(10px);
+      z-index: 20;
     }
-    #card {
-      width: min(560px, calc(100vw - 28px));
-      background: rgba(12,20,14,.92);
+
+    #splash { display: flex; }
+    #sCard {
+      width: min(960px, calc(100vw - 24px));
+      background: radial-gradient(1200px 420px at 20% -10%, rgba(120,255,190,.20), transparent 50%),
+                  radial-gradient(900px 420px at 80% 0%, rgba(120,190,255,.18), transparent 55%),
+                  rgba(10,14,12,.92);
       border: 1px solid rgba(255,255,255,.14);
-      border-radius: 16px;
-      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      border-radius: 22px;
+      box-shadow: 0 24px 90px rgba(0,0,0,.58);
+      padding: 18px 18px 16px;
+      color: rgba(255,255,255,.95);
+    }
+    #brandRow { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+    #brand { font-size: 22px; font-weight: 1000; display:flex; align-items:center; gap:10px; letter-spacing:.3px; }
+    #badge { font-size: 12px; font-weight: 900; padding:5px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.08); }
+
+    .grid { display:grid; grid-template-columns: 1.1fr 1fr; gap:14px; }
+    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+
+    .box { border:1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.22); border-radius:18px; padding:14px; }
+    .box h3 { margin:0 0 10px; font-size: 14px; letter-spacing:.2px; opacity:.95; }
+    label { font-size: 12px; font-weight: 900; opacity: .9; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+    button {
+      font-family: inherit;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.95);
+      padding: 10px 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .seg { display:inline-flex; gap:8px; flex-wrap:wrap; }
+    .seg button.active { background: rgba(120,255,190,.16); border-color: rgba(120,255,190,.28); }
+
+    .dd { position: relative; display:inline-block; min-width: 220px; }
+    .ddBtn { width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .ddLeft { display:flex; align-items:center; gap:10px; }
+    .swatch { width:18px; height:18px; border-radius:6px; border:1px solid rgba(255,255,255,.28); box-shadow: 0 0 0 2px rgba(0,0,0,.28) inset; }
+    .ddMenu {
+      position:absolute; left:0; right:0; top: calc(100% + 8px);
+      background: rgba(12,16,14,.96);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius: 14px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+      padding:6px;
+      display:none;
+      z-index: 50;
+    }
+    .ddItem {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid transparent;
+      font-weight: 900;
+      cursor:pointer;
+    }
+    .ddItem:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.10); }
+
+    .levels { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width: 620px){ .levels{ grid-template-columns: 1fr; } }
+    .levelCard {
+      cursor:pointer; user-select:none;
+      border-radius:18px; padding:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      position:relative; overflow:hidden;
+    }
+    .levelCard:hover { border-color: rgba(255,255,255,.22); }
+    .levelCard.active { outline: 3px solid rgba(120,255,190,.28); }
+    .levelTitle { font-size: 18px; font-weight: 1000; }
+    .levelSub { margin-top:6px; font-size: 12px; opacity:.85; font-weight: 800; }
+    .levelArt {
+      position:absolute; inset:-30px -30px auto auto;
+      width:220px; height:220px; border-radius:50%;
+      opacity:.70;
+    }
+    .parkArt { background: radial-gradient(circle at 30% 30%, rgba(120,255,190,.60), transparent 55%),
+                        radial-gradient(circle at 70% 60%, rgba(120,190,255,.40), transparent 60%); }
+    .spaceArt { background: radial-gradient(circle at 30% 30%, rgba(170,120,255,.60), transparent 55%),
+                         radial-gradient(circle at 70% 60%, rgba(120,210,255,.40), transparent 60%); }
+
+    #startRow { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-top:14px; flex-wrap:wrap; }
+    #startBtn {
+      padding: 12px 14px; border-radius: 14px;
+      border:1px solid rgba(255,255,255,.22);
+      background: linear-gradient(135deg, rgba(120,255,190,.22), rgba(120,190,255,.18));
+      font-weight: 1000;
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+    }
+    #hint { font-size: 12px; opacity: .85; font-weight: 800; }
+
+    .hidden { display:none !important; }
+
+    #qCard {
+      width: min(580px, calc(100vw - 28px));
+      background: rgba(10,14,12,.92);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 18px;
+      box-shadow: 0 22px 70px rgba(0,0,0,.55);
       padding: 16px 16px 14px;
       color: rgba(255,255,255,.94);
     }
-    #qTop { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
-    #whoTag { font-weight: 800; }
-    #prompt { margin: 12px 0 10px; font-size: 20px; font-weight: 800; letter-spacing: .2px; }
-    #sub { opacity: .85; font-size: 13px; margin-bottom: 10px; }
-    #row { display: flex; gap: 10px; align-items: center; }
-    #ans {
-      flex: 1;
-      padding: 10px 12px;
+    #qTop { display:flex; gap:10px; align-items:center; justify-content:space-between; }
+    .pill {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      font-weight: 900;
+    }
+    .dot { width:10px; height:10px; border-radius:50%; }
+    #qPrompt { margin:12px 0 10px; font-size: 20px; font-weight: 1000; }
+    #qSub { opacity:.85; font-size: 13px; margin-bottom: 10px; }
+    #qRow { display:flex; gap:10px; align-items:center; }
+    #qAns {
+      flex:1;
+      padding:10px 12px;
       border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.16);
       background: rgba(255,255,255,.06);
       color: rgba(255,255,255,.95);
       font-size: 16px;
       outline: none;
     }
-    #btn {
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.20);
-      background: rgba(90,220,120,.18);
-      color: rgba(255,255,255,.95);
-      font-weight: 800;
-      cursor: pointer;
-    }
-    #btn:active { transform: translateY(1px); }
-    #msg { margin-top: 10px; min-height: 18px; font-weight: 700; }
-    #tiny { opacity: .78; font-size: 12px; margin-top: 8px; }
-    .pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 5px 10px; border-radius: 999px;
+
+    #errOverlay { z-index: 30; }
+    #errCard {
+      width: min(760px, calc(100vw - 28px));
+      background: rgba(14,10,10,.94);
       border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.08);
-      font-weight: 800;
+      border-radius: 18px;
+      box-shadow: 0 22px 70px rgba(0,0,0,.60);
+      padding: 16px;
+      color: rgba(255,255,255,.95);
     }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .blue { background: #39a9ff; }
-    .red { background: #ff4b4b; }
+    #errTitle { font-weight: 1000; margin-bottom: 10px; }
+    #errText { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; opacity:.92; }
   </style>
 </head>
 <body>
   <div id="ui">
-    <div class="panel">
-      <div class="title">Math Tag Park</div>
+    <div class="panel" id="helpPanel">
+      <div class="title">Math Tag</div>
       <div>
-        Blue: <span class="kbd">W</span> jump, <span class="kbd">A</span>/<span class="kbd">D</span> move •
-        Red: <span class="kbd">↑</span> jump, <span class="kbd">←</span>/<span class="kbd">→</span> move •
+        P1: <span class="kbd">W</span> jump, <span class="kbd">A</span>/<span class="kbd">D</span> move •
+        P2: <span class="kbd">↑</span> jump, <span class="kbd">←</span>/<span class="kbd">→</span> move •
         Double jump always on.
       </div>
       <div style="margin-top:6px; opacity:.9;">
-        Tag by colliding → the <b>initiator</b> answers a math question to pass “it”.
-        Buffs require a math question too.
+        Tag by colliding → the <b>initiator</b> answers to pass “it”. Buffs also require questions.
       </div>
     </div>
     <div class="panel" id="hudPanel">
@@ -108,898 +213,1053 @@
     <canvas id="c" width="1100" height="650"></canvas>
   </div>
 
-  <div id="overlay">
-    <div id="card">
+  <!-- Splash -->
+  <div class="overlay" id="splash">
+    <div id="sCard">
+      <div id="brandRow">
+        <div id="brand">🏷️✨ Math Tag <span id="badge">2-Player • Single HTML</span></div>
+        <div style="opacity:.85; font-weight:1000; font-size:12px;">Park + Space</div>
+      </div>
+
+      <div class="grid">
+        <div class="box">
+          <h3>Players</h3>
+          <div class="row" style="gap:12px;">
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <label>Player 1 color (WASD)</label>
+              <div class="dd" id="p1DD"></div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <label>Player 2 color (Arrows)</label>
+              <div class="dd" id="p2DD"></div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <h3 style="margin:0 0 10px;">Questions</h3>
+            <div class="row">
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label>Difficulty (Grade)</label>
+                <div class="seg" id="gradeSeg"></div>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label>Type</label>
+                <div class="seg" id="typeSeg"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px; opacity:.86; font-weight:800; font-size:12px; line-height:1.3;">
+            One active effect at a time (new overrides).<br>
+            Invert (harmful): correct → enemy gets it, wrong → you get it.
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Choose a Level</h3>
+          <div class="levels">
+            <div class="levelCard" id="lvlPark">
+              <div class="levelArt parkArt"></div>
+              <div class="levelTitle">🌿 Park</div>
+              <div class="levelSub">Bright sky • green platforms • normal gravity</div>
+            </div>
+            <div class="levelCard" id="lvlSpace">
+              <div class="levelArt spaceArt"></div>
+              <div class="levelTitle">🌙 Space</div>
+              <div class="levelSub">Starfield • neon platforms • floaty gravity</div>
+            </div>
+          </div>
+
+          <div id="startRow">
+            <div id="hint">Launchpads in bottom corners = super jump. (No platforms above.)</div>
+            <button id="startBtn">Start Game</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Question Modal -->
+  <div class="overlay" id="qOverlay">
+    <div id="qCard">
       <div id="qTop">
-        <div class="pill"><span class="dot" id="whoDot"></span><span id="whoTag">Blue</span> answers</div>
-        <div style="opacity:.9; font-weight:800;" id="reason">Tag attempt</div>
+        <div class="pill"><span class="dot" id="whoDot"></span><span id="whoName">P1</span> answers</div>
+        <div style="opacity:.9; font-weight:1000;" id="qReason">Tag attempt</div>
       </div>
-      <div id="prompt">What is 7 × 8?</div>
-      <div id="sub">Type your answer and press Enter.</div>
-      <div id="row">
-        <input id="ans" autocomplete="off" inputmode="numeric" placeholder="Answer…" />
-        <button id="btn">Submit</button>
+      <div id="qPrompt">Question…</div>
+      <div id="qSub">Type your answer and press Enter. (Fractions like 3/4 are okay.)</div>
+      <div id="qRow">
+        <input id="qAns" autocomplete="off" inputmode="numeric" placeholder="Answer…" />
+        <button id="qBtn">Submit</button>
       </div>
-      <div id="msg"></div>
-      <div id="tiny">Tip: fractions like 3/4 are okay. Decimals too.</div>
+      <div id="qMsg" style="margin-top:10px; min-height:18px; font-weight:900;"></div>
+      <div style="opacity:.75; font-size:12px; margin-top:8px;">Esc = skip (counts as incorrect)</div>
+    </div>
+  </div>
+
+  <!-- Error overlay -->
+  <div class="overlay" id="errOverlay">
+    <div id="errCard">
+      <div id="errTitle">⚠️ Something went wrong on this device</div>
+      <div style="opacity:.85; font-weight:800; margin-bottom:10px;">
+        Please copy this text to me — I’ll patch it fast.
+      </div>
+      <div id="errText"></div>
     </div>
   </div>
 
 <script>
 (() => {
-  // ---------- Canvas ----------
+  'use strict';
+
+  // ---------------- DOM ----------------
   const canvas = document.getElementById('c');
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { alpha: true });
 
-  const W = canvas.width, H = canvas.height;
-
-  // ---------- Overlay / Question UI ----------
-  const overlay = document.getElementById('overlay');
-  const promptEl = document.getElementById('prompt');
-  const ansEl = document.getElementById('ans');
-  const msgEl = document.getElementById('msg');
-  const whoTagEl = document.getElementById('whoTag');
-  const whoDot = document.getElementById('whoDot');
-  const reasonEl = document.getElementById('reason');
-  const btn = document.getElementById('btn');
   const hudEl = document.getElementById('hud');
+  const helpPanel = document.getElementById('helpPanel');
+  const hudPanel  = document.getElementById('hudPanel');
 
-  let pausedForQuestion = false;
-  let pendingQuestion = null; // { text, check(answerString)->bool, onResolve(correct) }
-  let lastQuestionTime = 0;
+  const splash   = document.getElementById('splash');
+  const startBtn = document.getElementById('startBtn');
+  const lvlPark  = document.getElementById('lvlPark');
+  const lvlSpace = document.getElementById('lvlSpace');
 
-  function showQuestion({ who, reason, q }) {
-    pausedForQuestion = true;
-    overlay.style.display = 'flex';
-    msgEl.textContent = '';
-    pendingQuestion = { ...q, who, reason };
+  const gradeSeg = document.getElementById('gradeSeg');
+  const typeSeg  = document.getElementById('typeSeg');
 
-    promptEl.textContent = q.text;
-    reasonEl.textContent = reason;
-    whoTagEl.textContent = who.name;
-    whoDot.className = 'dot ' + (who.id === 'P1' ? 'blue' : 'red');
+  const qOverlay  = document.getElementById('qOverlay');
+  const qPromptEl = document.getElementById('qPrompt');
+  const qAnsEl    = document.getElementById('qAns');
+  const qBtn      = document.getElementById('qBtn');
+  const qMsgEl    = document.getElementById('qMsg');
+  const whoDot    = document.getElementById('whoDot');
+  const whoName   = document.getElementById('whoName');
+  const qReasonEl = document.getElementById('qReason');
 
-    ansEl.value = '';
-    ansEl.focus();
-  }
+  const errOverlay = document.getElementById('errOverlay');
+  const errTextEl  = document.getElementById('errText');
 
-  function closeQuestion() {
-    overlay.style.display = 'none';
-    pausedForQuestion = false;
-    pendingQuestion = null;
-  }
+  // ---------------- Constants ----------------
+  const BASE_W = 1100, BASE_H = 650;
+  const W = BASE_W, H = BASE_H;
 
-  function normalizeAnswer(s) {
-    return (s ?? '').toString().trim().replace(/\s+/g, '');
-  }
+  const COLORS = [
+    { name: "Blue",   hex: "#39a9ff" },
+    { name: "Red",    hex: "#ff4b4b" },
+    { name: "Green",  hex: "#3cff7b" },
+    { name: "Yellow", hex: "#ffe36a" },
+    { name: "Orange", hex: "#ff9a3c" },
+    { name: "Purple", hex: "#b184ff" },
+    { name: "Pink",   hex: "#ff6ad5" },
+    { name: "Cyan",   hex: "#49fff2" },
+  ];
+  const GRADES = ["Grade 4", "Grade 5", "Grade 6"];
+  const QTYPES = ["Numbers", "Geometry", "Operations"];
 
-  function parseMaybeNumberOrFraction(s) {
-    s = normalizeAnswer(s);
-    if (!s) return null;
+  // ---------------- Utils ----------------
+  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+  const rand = (a,b)=>a+Math.random()*(b-a);
+  const randi = (a,b)=>Math.floor(rand(a,b));
+  const nowMs = ()=>performance.now();
 
-    // Fraction like a/b
-    if (s.includes('/')) {
-      const [a, b] = s.split('/');
-      const na = Number(a), nb = Number(b);
-      if (!Number.isFinite(na) || !Number.isFinite(nb) || nb === 0) return null;
-      return na / nb;
-    }
-
-    // Simple number
-    const n = Number(s);
-    if (!Number.isFinite(n)) return null;
-    return n;
-  }
-
-  function submitAnswer() {
-    if (!pendingQuestion) return;
-    const raw = ansEl.value;
-    const ok = pendingQuestion.check(raw);
-
-    msgEl.textContent = ok ? '✅ Correct!' : '❌ Not quite.';
-    msgEl.style.color = ok ? 'rgba(140,255,170,.95)' : 'rgba(255,160,160,.95)';
-
-    // Resolve after a short beat
-    setTimeout(() => {
-      const onResolve = pendingQuestion.onResolve;
-      closeQuestion();
-      onResolve(ok);
-      lastQuestionTime = performance.now();
-    }, 420);
-  }
-
-  btn.addEventListener('click', submitAnswer);
-  ansEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') submitAnswer();
-    if (e.key === 'Escape') {
-      // Escape = treat as incorrect (keeps game moving)
-      if (!pendingQuestion) return;
-      msgEl.textContent = '❌ Skipped (counts as incorrect).';
-      msgEl.style.color = 'rgba(255,160,160,.95)';
-      setTimeout(() => {
-        const onResolve = pendingQuestion.onResolve;
-        closeQuestion();
-        onResolve(false);
-        lastQuestionTime = performance.now();
-      }, 420);
-    }
-  });
-
-  // ---------- Input ----------
-  const keys = new Set();
-  window.addEventListener('keydown', (e) => {
-    if (pausedForQuestion) return;
-    keys.add(e.key);
-  });
-  window.addEventListener('keyup', (e) => keys.delete(e.key));
-
-  // ---------- Helpers ----------
-  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-  function rand(a, b) { return a + Math.random() * (b - a); }
-  function randi(a, b) { return Math.floor(rand(a, b)); }
-
-  function aabbOverlap(a, b) {
+  function aabb(a,b){
     return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
   }
 
-  function resolveAABB(m, s) {
-    // Move m out of s along smallest overlap axis
+  function showSplash(show){
+    splash.style.display = show ? 'flex' : 'none';
+    helpPanel.classList.toggle('hidden', show);
+    hudPanel.classList.toggle('hidden', show);
+  }
+
+  function showFatal(err){
+    errOverlay.style.display = 'flex';
+    errTextEl.textContent = String(err && err.stack ? err.stack : err);
+  }
+
+  function applyHiDPI(){
+    const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+    canvas.width  = Math.floor(BASE_W * dpr);
+    canvas.height = Math.floor(BASE_H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  applyHiDPI();
+  window.addEventListener('resize', applyHiDPI);
+
+  // ---------------- Input ----------------
+  const keys = new Set();
+  window.addEventListener('keydown', (e) => {
+    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key)) e.preventDefault();
+    if (game.state === 'question') return;
+    keys.add(e.key);
+  }, { passive:false });
+  window.addEventListener('keyup', (e) => keys.delete(e.key));
+
+  // ---------------- UI widgets ----------------
+  function buildSeg(container, items, onPick, defaultIndex=0) {
+    container.innerHTML = "";
+    items.forEach((label, idx) => {
+      const b = document.createElement('button');
+      b.textContent = label;
+      b.addEventListener('click', () => {
+        [...container.querySelectorAll('button')].forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        onPick(label, idx);
+      });
+      container.appendChild(b);
+    });
+    container.querySelectorAll('button')[defaultIndex].classList.add('active');
+    onPick(items[defaultIndex], defaultIndex);
+  }
+
+  function makeColorDropdown(mountEl, defaultName) {
+    const dd = document.createElement('div');
+    dd.className = 'dd';
+
+    const btn = document.createElement('button');
+    btn.className = 'ddBtn';
+    btn.type = 'button';
+
+    const left = document.createElement('span');
+    left.className = 'ddLeft';
+
+    const sw = document.createElement('span');
+    sw.className = 'swatch';
+
+    const txt = document.createElement('span');
+    txt.style.fontWeight = '1000';
+
+    const chev = document.createElement('span');
+    chev.textContent = '▾';
+    chev.style.opacity = '0.85';
+    chev.style.fontWeight = '1000';
+
+    left.appendChild(sw);
+    left.appendChild(txt);
+    btn.appendChild(left);
+    btn.appendChild(chev);
+
+    const menu = document.createElement('div');
+    menu.className = 'ddMenu';
+
+    dd.appendChild(btn);
+    dd.appendChild(menu);
+    mountEl.replaceWith(dd);
+
+    let value = COLORS.find(c => c.name === defaultName)?.hex || COLORS[0].hex;
+
+    function setVal(hex){
+      value = hex || COLORS[0].hex;
+      const item = COLORS.find(c => c.hex === value) || COLORS[0];
+      sw.style.background = item.hex;
+      txt.textContent = item.name;
+    }
+    function closeMenu(){ menu.style.display = 'none'; }
+    function toggleMenu(){ menu.style.display = (menu.style.display === 'block') ? 'none' : 'block'; }
+
+    COLORS.forEach(c => {
+      const it = document.createElement('div');
+      it.className = 'ddItem';
+      const s = document.createElement('span');
+      s.className = 'swatch';
+      s.style.background = c.hex;
+      const t = document.createElement('span');
+      t.textContent = c.name;
+      it.appendChild(s); it.appendChild(t);
+      it.addEventListener('click', () => { setVal(c.hex); closeMenu(); dd.dispatchEvent(new Event('change')); });
+      menu.appendChild(it);
+    });
+
+    btn.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
+    window.addEventListener('click', closeMenu);
+
+    setVal(value);
+
+    return {
+      get value(){ return value; },
+      set value(hex){ setVal(hex); },
+      onChange(fn){ dd.addEventListener('change', fn); }
+    };
+  }
+
+  // ---------------- Levels ----------------
+  function makeLevelPark(){
+    const groundH = 48;
+    const ground = { x: 0, y: H-groundH, w: W, h: groundH, kind:'ground' };
+    const pads = [
+      { x: 14, y: H-groundH-14, w: 80, h: 14 },
+      { x: W-14-80, y: H-groundH-14, w: 80, h: 14 },
+    ];
+    const platforms = [
+      ground,
+      { x: 160, y: H-170, w: 220, h: 20 },
+      { x: W-160-220, y: H-170, w: 220, h: 20 },
+      { x: (W/2)-170, y: H-270, w: 340, h: 22 },
+      { x: 170, y: H-360, w: 210, h: 20 },
+      { x: W-170-210, y: H-360, w: 210, h: 20 },
+      { x: (W/2)-120, y: H-450, w: 240, h: 18 },
+      { x: (W/2)-420, y: H-430, w: 120, h: 16 },
+      { x: (W/2)+300, y: H-430, w: 120, h: 16 },
+    ];
+    return {
+      name: "Park",
+      theme: "park",
+      gravity: 1400,
+      maxFall: 950,
+      baseJump: 520,
+      baseSpeed: 250,
+      groundH,
+      pads,
+      platforms,
+      buffIcons: {
+        speed: '⚡', jump: '🦘', both: '✨',
+        swapIt: '👑', invert: '🔁', teleport: '🌀', slowEnemy: '🧊'
+      }
+    };
+  }
+
+  function makeLevelSpace(){
+    const groundH = 44;
+    const ground = { x: 0, y: H-groundH, w: W, h: groundH, kind:'ground' };
+    const pads = [
+      { x: 14, y: H-groundH-14, w: 80, h: 14 },
+      { x: W-14-80, y: H-groundH-14, w: 80, h: 14 },
+    ];
+    // VERY different layout from Park
+    const platforms = [
+      ground,
+      { x: (W/2)-320, y: H-190, w: 260, h: 18 },
+      { x: (W/2)+60,  y: H-190, w: 260, h: 18 },
+      { x: (W/2)-140, y: H-285, w: 280, h: 18 },
+      { x: 220, y: H-360, w: 180, h: 16 },
+      { x: W-220-180, y: H-360, w: 180, h: 16 },
+      { x: (W/2)-380, y: H-440, w: 200, h: 16 },
+      { x: (W/2)+180, y: H-440, w: 200, h: 16 },
+      { x: (W/2)-130, y: H-525, w: 260, h: 16 },
+      { x: 120, y: H-520, w: 150, h: 14 },
+      { x: W-270, y: H-520, w: 150, h: 14 },
+    ];
+    return {
+      name: "Space",
+      theme: "space",
+      gravity: 820,
+      maxFall: 620,
+      baseJump: 480,
+      baseSpeed: 240,
+      groundH,
+      pads,
+      platforms,
+      buffIcons: {
+        speed: '🚀', jump: '🌙', both: '✨',
+        swapIt: '👽', invert: '🌀', teleport: '🛸', slowEnemy: '🧊'
+      }
+    };
+  }
+
+  // ---------------- Game State ----------------
+  const game = {
+    state: 'splash', // splash | play | question
+    level: makeLevelPark(),
+    config: { p1Color: "#39a9ff", p2Color: "#ff4b4b", grade:"Grade 5", qtype:"Numbers" },
+    buffsOnMap: [],
+    buffSpawnTimer: 0,
+    lastOverlap: false,
+    lastT: nowMs()
+  };
+
+  // ---------------- Splash wiring ----------------
+  let pickedGrade = "Grade 5";
+  let pickedType  = "Numbers";
+  buildSeg(gradeSeg, GRADES, (x)=>pickedGrade=x, 1);
+  buildSeg(typeSeg,  QTYPES, (x)=>pickedType=x, 0);
+
+  let selectedLevel = "Park";
+  function setLevelChoice(name){
+    selectedLevel = name;
+    lvlPark.classList.toggle('active', name === "Park");
+    lvlSpace.classList.toggle('active', name === "Space");
+  }
+  lvlPark.addEventListener('click', ()=>setLevelChoice("Park"));
+  lvlSpace.addEventListener('click', ()=>setLevelChoice("Space"));
+  setLevelChoice("Park");
+
+  const p1DD = makeColorDropdown(document.getElementById('p1DD'), "Blue");
+  const p2DD = makeColorDropdown(document.getElementById('p2DD'), "Red");
+
+  function enforceDifferentColors(){
+    if (p1DD.value === p2DD.value) {
+      const idx = COLORS.findIndex(c=>c.hex===p2DD.value);
+      p2DD.value = COLORS[(idx+1) % COLORS.length].hex;
+    }
+  }
+  p1DD.onChange(enforceDifferentColors);
+  p2DD.onChange(enforceDifferentColors);
+  enforceDifferentColors();
+
+  startBtn.addEventListener('click', () => {
+    game.config = { p1Color: p1DD.value, p2Color: p2DD.value, grade: pickedGrade, qtype: pickedType };
+    game.level = (selectedLevel === "Space") ? makeLevelSpace() : makeLevelPark();
+    // IMPORTANT: also update any "preview" state if we ever draw on splash
+    resetPlayers(true);
+    startGame();
+  });
+
+  // ---------------- Players ----------------
+  function makePlayer(id, color, x, y, controls){
+    return {
+      id,
+      color: (typeof color === 'string' && color.trim()) ? color : '#ffffff',
+      x, y, w: 34, h: 46,
+      vx: 0, vy: 0,
+      facing: 1,
+      onGround: false,
+      jumpsLeft: 2,
+      isIt: false,
+      controls,
+      tagCooldown: 0,
+      effect: { kind: null, until: 0 },
+      _jumpHeld: false,
+      _launchCD: 0
+    };
+  }
+
+  let P1 = null, P2 = null;
+
+  // initOnly=true means "make sure P1/P2 exist even on splash"
+  function resetPlayers(initOnly=false){
+    const c1 = game.config.p1Color || "#39a9ff";
+    const c2 = game.config.p2Color || "#ff4b4b";
+
+    P1 = makePlayer('P1', c1, 220, H-260, { left:'a', right:'d', jump:'w' });
+    P2 = makePlayer('P2', c2, W-260, H-260, { left:'ArrowLeft', right:'ArrowRight', jump:'ArrowUp' });
+
+    // only randomize "it" when starting actual play
+    if (!initOnly) (Math.random() < 0.5 ? P1 : P2).isIt = true;
+  }
+
+  // ---------------- Physics ----------------
+  function resolveAABB(m, s){
     const dx1 = (s.x + s.w) - m.x;
     const dx2 = (m.x + m.w) - s.x;
     const dy1 = (s.y + s.h) - m.y;
     const dy2 = (m.y + m.h) - s.y;
-
     const ox = Math.min(dx1, dx2);
     const oy = Math.min(dy1, dy2);
 
     if (ox < oy) {
-      // push in x
       if (dx1 < dx2) m.x = s.x + s.w;
       else m.x = s.x - m.w;
       m.vx = 0;
-      return { axis: 'x' };
     } else {
-      // push in y
       if (dy1 < dy2) {
         m.y = s.y + s.h;
-        m.vy = Math.max(0, m.vy);
-        return { axis: 'y', from: 'top' }; // m is below
+        if (m.vy < 0) m.vy = 0;
       } else {
         m.y = s.y - m.h;
         m.vy = 0;
         m.onGround = true;
         m.jumpsLeft = 2;
-        return { axis: 'y', from: 'bottom' }; // landed on platform
       }
     }
   }
 
-  function drawRoundedRect(x, y, w, h, r) {
-    r = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.arcTo(x+w, y, x+w, y+h, r);
-    ctx.arcTo(x+w, y+h, x, y+h, r);
-    ctx.arcTo(x, y+h, x, y, r);
-    ctx.arcTo(x, y, x+w, y, r);
-    ctx.closePath();
-    ctx.fill();
-  }
+  function effectActive(p){ return p && p.effect && p.effect.kind && nowMs() < p.effect.until; }
+  function effectKind(p){ return effectActive(p) ? p.effect.kind : null; }
+  function clearEffect(p){ if (!p) return; p.effect.kind=null; p.effect.until=0; }
+  function setEffect(p, kind, ms){ if (!p) return; p.effect.kind=kind; p.effect.until=nowMs()+ms; }
 
-  // ---------- World / Platforms ----------
-  const ground = { x: 0, y: H - 48, w: W, h: 48, type: 'ground' };
-
-  // Ensure launchpad clearance: keep corners open above pads.
-  const launchPadSize = { w: 80, h: 14 };
-  const launchPads = [
-    { x: 14, y: H - 48 - launchPadSize.h, w: launchPadSize.w, h: launchPadSize.h, side: 'L' },
-    { x: W - 14 - launchPadSize.w, y: H - 48 - launchPadSize.h, w: launchPadSize.w, h: launchPadSize.h, side: 'R' }
-  ];
-
-  // Nature platforms (no platforms above launchpads)
-  const platforms = [
-    ground,
-
-    // mid-low
-    { x: 160, y: H - 170, w: 220, h: 20 },
-    { x: W - 160 - 220, y: H - 170, w: 220, h: 20 },
-
-    // middle
-    { x: (W/2) - 170, y: H - 270, w: 340, h: 22 },
-
-    // upper left / right
-    { x: 170, y: H - 360, w: 210, h: 20 },
-    { x: W - 170 - 210, y: H - 360, w: 210, h: 20 },
-
-    // top-ish
-    { x: (W/2) - 120, y: H - 450, w: 240, h: 18 },
-
-    // small stepping stones
-    { x: (W/2) - 420, y: H - 430, w: 120, h: 16 },
-    { x: (W/2) + 300, y: H - 430, w: 120, h: 16 },
-
-    // NOTE: no platforms in "launchpad columns"
-  ];
-
-  // Safe spots for teleport
-  function randomSafeSpot(entityW, entityH) {
-    // Try a few random points, else fallback center
-    for (let i = 0; i < 60; i++) {
-      const x = rand(110, W - 110 - entityW);
-      const y = rand(60, H - 140 - entityH);
-      const test = { x, y, w: entityW, h: entityH };
-      // avoid launchpad columns (keep them clear)
-      const leftCol = x < 120;
-      const rightCol = x + entityW > W - 120;
-      if (leftCol || rightCol) continue;
-
-      let ok = true;
-      for (const p of platforms) if (aabbOverlap(test, p)) { ok = false; break; }
-      if (ok) return { x, y };
-    }
-    return { x: (W/2) - entityW/2, y: 80 };
-  }
-
-  // ---------- Players ----------
-  const base = {
-    w: 34, h: 46,
-    speed: 250,
-    jumpV: 520,
-    gravity: 1400,
-    maxFall: 950
-  };
-
-  function makePlayer(id, name, color, startX, startY, controls) {
-    return {
-      id, name, color,
-      x: startX, y: startY, w: base.w, h: base.h,
-      vx: 0, vy: 0,
-      onGround: false,
-      jumpsLeft: 2,
-      facing: 1,
-      controls,
-      isIt: false,
-      // effect timers (ms remaining)
-      speedBoost: 0,
-      jumpBoost: 0,
-      invert: 0,
-      slow: 0, // applied to THIS player when enemy slows you
-      // cooldown so you don't re-trigger tag every frame
-      tagCooldown: 0
-    };
-  }
-
-  const P1 = makePlayer('P1', 'Blue', '#39a9ff', 220, H - 260, {
-    left: 'a', right: 'd', jump: 'w'
-  });
-  const P2 = makePlayer('P2', 'Red', '#ff4b4b', W - 260, H - 260, {
-    left: 'ArrowLeft', right: 'ArrowRight', jump: 'ArrowUp'
-  });
-
-  // Randomly decide who starts "it"
-  (Math.random() < 0.5 ? P1 : P2).isIt = true;
-
-  // ---------- Buffs ----------
-  const BUFFS = [
-    { key: 'speed', label: 'Superspeed (10s)', rarity: 1.0 },
-    { key: 'jump', label: 'Higher Jumps (10s)', rarity: 1.0 },
-    { key: 'both', label: 'Jump+Speed (10s)', rarity: 0.45 },
-    { key: 'swapIt', label: 'Make other “it”', rarity: 0.12 },
-    { key: 'invert', label: 'Invert controls (10s)', rarity: 0.55, debuff: true },
-    { key: 'teleport', label: 'Teleporter', rarity: 0.7 },
-    { key: 'slowEnemy', label: 'Slow enemy (10s)', rarity: 0.65 }
-  ];
-
-  const buffIcons = {
-    speed: '⚡', jump: '🦘', both: '✨', swapIt: '👑', invert: '🔁', teleport: '🌀', slowEnemy: '🧊'
-  };
-
-  const buffColors = {
-    speed: 'rgba(255,255,255,.90)',
-    jump: 'rgba(255,255,255,.90)',
-    both: 'rgba(255,255,255,.90)',
-    swapIt: 'rgba(255,255,255,.90)',
-    invert: 'rgba(255,255,255,.90)',
-    teleport: 'rgba(255,255,255,.90)',
-    slowEnemy: 'rgba(255,255,255,.90)'
-  };
-
-  let buffsOnMap = [];
-  let buffSpawnTimer = 0;
-
-  function weightedPick(items) {
-    const total = items.reduce((s, it) => s + it.rarity, 0);
-    let r = Math.random() * total;
-    for (const it of items) {
-      r -= it.rarity;
-      if (r <= 0) return it;
-    }
-    return items[items.length - 1];
-  }
-
-  function spawnBuff() {
-    const b = weightedPick(BUFFS);
-    // spawn away from players and away from launchpad columns
-    for (let t = 0; t < 30; t++) {
-      const x = rand(140, W - 140);
-      const y = rand(80, H - 220);
-      if (x < 140 || x > W - 140) continue;
-      const rect = { x, y, w: 26, h: 26 };
-      if (aabbOverlap(rect, P1) || aabbOverlap(rect, P2)) continue;
-      let bad = false;
-      for (const p of platforms) if (aabbOverlap(rect, p)) { bad = true; break; }
-      if (bad) continue;
-      buffsOnMap.push({
-        type: b.key,
-        label: b.label,
-        debuff: !!b.debuff,
-        x, y, w: 26, h: 26,
-        bob: 0
-      });
-      return;
-    }
-  }
-
-  // ---------- Math Questions (Grade 5-ish) ----------
-  function makeQuestion() {
-    // Mix of: multi-digit ops, decimals, fractions, factors, perimeter/area, order of ops
-    const types = ['add', 'sub', 'mul', 'div', 'dec', 'frac', 'area', 'perim', 'ops'];
-    const t = types[randi(0, types.length)];
-
-    const q = { text: '', check: () => false, onResolve: () => {} };
-
-    if (t === 'add') {
-      const a = randi(120, 900), b = randi(80, 700);
-      const ans = a + b;
-      q.text = `What is ${a} + ${b}?`;
-      q.check = (s) => parseMaybeNumberOrFraction(s) === ans;
-      return q;
-    }
-
-    if (t === 'sub') {
-      const a = randi(200, 999), b = randi(30, 180);
-      const ans = a - b;
-      q.text = `What is ${a} − ${b}?`;
-      q.check = (s) => parseMaybeNumberOrFraction(s) === ans;
-      return q;
-    }
-
-    if (t === 'mul') {
-      const a = randi(6, 24), b = randi(6, 24);
-      const ans = a * b;
-      q.text = `What is ${a} × ${b}?`;
-      q.check = (s) => parseMaybeNumberOrFraction(s) === ans;
-      return q;
-    }
-
-    if (t === 'div') {
-      const b = randi(3, 12);
-      const ans = randi(4, 18);
-      const a = b * ans;
-      q.text = `What is ${a} ÷ ${b}?`;
-      q.check = (s) => parseMaybeNumberOrFraction(s) === ans;
-      return q;
-    }
-
-    if (t === 'dec') {
-      // one decimal place + one decimal place
-      const a = randi(12, 89) / 10;
-      const b = randi(12, 89) / 10;
-      const ans = Math.round((a + b) * 10) / 10;
-      q.text = `What is ${a.toFixed(1)} + ${b.toFixed(1)}?`;
-      q.check = (s) => {
-        const n = parseMaybeNumberOrFraction(s);
-        return n !== null && Math.abs(n - ans) < 1e-9;
-      };
-      return q;
-    }
-
-    if (t === 'frac') {
-      // add like 1/4 + 2/4 or simplify not required (accept equivalent)
-      const den = [4, 5, 6, 8][randi(0, 4)];
-      const a = randi(1, den - 1);
-      const b = randi(1, den - 1);
-      const num = a + b;
-      q.text = `What is ${a}/${den} + ${b}/${den}? (Answer as a fraction or decimal)`;
-      const exact = num / den;
-      q.check = (s) => {
-        const n = parseMaybeNumberOrFraction(s);
-        return n !== null && Math.abs(n - exact) < 1e-9;
-      };
-      return q;
-    }
-
-    if (t === 'area') {
-      const w = randi(4, 18);
-      const h = randi(3, 14);
-      const ans = w * h;
-      q.text = `A rectangle is ${w} units wide and ${h} units tall. What is its area?`;
-      q.check = (s) => parseMaybeNumberOrFraction(s) === ans;
-      return q;
-    }
-
-    if (t === 'perim') {
-      const w = randi(5, 22);
-      const h = randi(4, 18);
-      const ans = 2 * (w + h);
-      q.text = `A rectangle is ${w} cm by ${h} cm. What is its perimeter (cm)?`;
-      q.check = (s) => parseMaybeNumberOrFraction(s) === ans;
-      return q;
-    }
-
-    // ops
-    {
-      const a = randi(2, 12), b = randi(2, 12), c = randi(5, 30);
-      const ans = a * b + c;
-      q.text = `What is ${a} × ${b} + ${c}?`;
-      q.check = (s) => parseMaybeNumberOrFraction(s) === ans;
-      return q;
-    }
-  }
-
-  // ---------- Tag Logic ----------
-  let lastPlayersOverlapping = false;
-
-  function initiatorOfCollision(A, B) {
-    // Determine initiator based on relative motion towards the other along separation axis.
-    const acx = A.x + A.w/2, acy = A.y + A.h/2;
-    const bcx = B.x + B.w/2, bcy = B.y + B.h/2;
-    const sx = bcx - acx;
-    const sy = bcy - acy;
-
-    // Relative velocity A towards B is (A - B)
-    const rvx = A.vx - B.vx;
-    const rvy = A.vy - B.vy;
-
-    // If dot(relVel, sep) > 0 then A moving towards B (in direction from A->B)
-    const dot = rvx * sx + rvy * sy;
-
-    // If dot is strongly positive -> A initiated.
-    // If strongly negative -> B initiated.
-    if (dot > 0) return A;
-    if (dot < 0) return B;
-
-    // fallback: who is moving faster overall
-    const as = A.vx*A.vx + A.vy*A.vy;
-    const bs = B.vx*B.vx + B.vy*B.vy;
-    return as >= bs ? A : B;
-  }
-
-  function tryStartTagQuestion(initiator, other) {
-    // Only if one is "it"
-    const itPlayer = P1.isIt ? P1 : P2.isIt ? P2 : null;
-    if (!itPlayer) return;
-
-    // If initiator isn't "it", collision doesn't trigger a tag attempt
-    if (initiator !== itPlayer) return;
-
-    // Cooldown
-    if (initiator.tagCooldown > 0) return;
-    initiator.tagCooldown = 700;
-
-    const q = makeQuestion();
-
-    showQuestion({
-      who: initiator,
-      reason: 'Tag attempt',
-      q: {
-        text: q.text,
-        check: q.check,
-        onResolve: (correct) => {
-          if (correct) {
-            initiator.isIt = false;
-            other.isIt = true;
-          } else {
-            // stays it
-          }
-        }
-      }
-    });
-  }
-
-  // ---------- Buff application ----------
-  function applyBuff(player, type) {
-    const enemy = (player === P1) ? P2 : P1;
-
-    const tenSec = 10000;
-
-    if (type === 'speed') player.speedBoost = tenSec;
-    else if (type === 'jump') player.jumpBoost = tenSec;
-    else if (type === 'both') { player.speedBoost = tenSec; player.jumpBoost = tenSec; }
-    else if (type === 'swapIt') { enemy.isIt = true; player.isIt = false; }
-    else if (type === 'invert') player.invert = tenSec;
-    else if (type === 'teleport') {
-      const spot = randomSafeSpot(player.w, player.h);
-      player.x = spot.x; player.y = spot.y;
-      player.vx = 0; player.vy = 0;
-    }
-    else if (type === 'slowEnemy') enemy.slow = tenSec;
-  }
-
-  function tryCollectBuff(player) {
-    for (let i = 0; i < buffsOnMap.length; i++) {
-      const b = buffsOnMap[i];
-      if (!aabbOverlap(player, b)) continue;
-
-      // Remove from map immediately
-      buffsOnMap.splice(i, 1);
-
-      const q = makeQuestion();
-      showQuestion({
-        who: player,
-        reason: `Buff pickup: ${buffIcons[b.type]} ${b.label}`,
-        q: {
-          text: q.text,
-          check: q.check,
-          onResolve: (correct) => {
-            if (correct) {
-              applyBuff(player, b.type);
-            } else {
-              // no buff
-            }
-          }
-        }
-      });
-      return;
-    }
-  }
-
-  // ---------- Physics / Movement ----------
-  function effectiveSpeed(p) {
-    let s = base.speed;
-    if (p.speedBoost > 0) s *= 1.65;
-    if (p.slow > 0) s *= 0.60;
+  function speedFor(p){
+    let s = game.level.baseSpeed;
+    const k = effectKind(p);
+    if (k === 'speed' || k === 'both') s *= 1.65;
+    if (k === 'slow') s *= 0.60;
     return s;
   }
-
-  function effectiveJump(p) {
-    let j = base.jumpV;
-    if (p.jumpBoost > 0) j *= 1.25;
+  function jumpFor(p){
+    let j = game.level.baseJump;
+    const k = effectKind(p);
+    if (k === 'jump' || k === 'both') j *= 1.25;
     return j;
   }
+  function inverted(p){ return effectKind(p) === 'invert'; }
 
-  function updatePlayer(p, dt) {
+  function updatePlayer(p, dt){
+    if (!p) return;
+
     p.onGround = false;
-
-    // timers
-    p.speedBoost = Math.max(0, p.speedBoost - dt);
-    p.jumpBoost = Math.max(0, p.jumpBoost - dt);
-    p.invert = Math.max(0, p.invert - dt);
-    p.slow = Math.max(0, p.slow - dt);
     p.tagCooldown = Math.max(0, p.tagCooldown - dt);
+    p._launchCD = Math.max(0, p._launchCD - dt);
 
-    const inv = (p.invert > 0) ? -1 : 1;
-
-    // inputs
-    const leftPressed = keys.has(p.controls.left);
-    const rightPressed = keys.has(p.controls.right);
-    const jumpPressed = keys.has(p.controls.jump);
+    const inv = inverted(p) ? -1 : 1;
+    const left = keys.has(p.controls.left);
+    const right = keys.has(p.controls.right);
+    const jump = keys.has(p.controls.jump);
 
     let move = 0;
-    if (leftPressed) move -= 1;
-    if (rightPressed) move += 1;
+    if (left) move -= 1;
+    if (right) move += 1;
     move *= inv;
 
-    // horizontal accel
-    const targetVx = move * effectiveSpeed(p);
-    // smooth
+    const targetVx = move * speedFor(p);
     const accel = 2200;
-    p.vx += clamp(targetVx - p.vx, -accel*dt/1000, accel*dt/1000);
-
+    p.vx += clamp(targetVx - p.vx, -accel*(dt/1000), accel*(dt/1000));
     if (move !== 0) p.facing = Math.sign(move);
 
-    // jumping (edge triggered)
-    if (!p._jumpHeld && jumpPressed) {
+    if (!p._jumpHeld && jump) {
       if (p.jumpsLeft > 0) {
-        p.vy = -effectiveJump(p);
+        p.vy = -jumpFor(p);
         p.jumpsLeft -= 1;
       }
     }
-    p._jumpHeld = jumpPressed;
+    p._jumpHeld = jump;
 
-    // gravity
-    p.vy += base.gravity * (dt/1000);
-    p.vy = Math.min(p.vy, base.maxFall);
+    p.vy += game.level.gravity * (dt/1000);
+    p.vy = Math.min(p.vy, game.level.maxFall);
 
-    // integrate
     p.x += p.vx * (dt/1000);
     p.y += p.vy * (dt/1000);
 
-    // bounds
     p.x = clamp(p.x, 0, W - p.w);
 
-    // collisions with platforms
-    for (const plat of platforms) {
-      if (!aabbOverlap(p, plat)) continue;
-      resolveAABB(p, plat);
+    for (const plat of game.level.platforms) {
+      if (aabb(p, plat)) resolveAABB(p, plat);
     }
 
-    // floor safety
-    if (p.y > H - p.h - ground.h) {
-      p.y = H - p.h - ground.h;
-      p.vy = 0;
-      p.onGround = true;
-      p.jumpsLeft = 2;
+    const gy = H - game.level.groundH - p.h;
+    if (p.y > gy) {
+      p.y = gy; p.vy = 0; p.onGround = true; p.jumpsLeft = 2;
     }
 
-    // launch pads
-    for (const lp of launchPads) {
-      if (aabbOverlap(p, lp)) {
-        // super jump, but avoid repeated triggers by requiring a small cooldown on vertical
-        if (!p._launchCD || p._launchCD <= 0) {
-          p.vy = -820;
-          p._launchCD = 700;
-        }
+    for (const lp of game.level.pads) {
+      if (aabb(p, lp) && p._launchCD <= 0) {
+        p.vy = (game.level.theme === 'space') ? -740 : -820;
+        p._launchCD = 700;
       }
     }
-    p._launchCD = (p._launchCD || 0) - dt;
+
+    if (p.effect.kind && nowMs() >= p.effect.until) clearEffect(p);
   }
 
-  // ---------- Drawing (park background + nature platforms) ----------
-  function drawBackground(t) {
-    // sky gradient
-    const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#78c8ff');
-    g.addColorStop(0.45, '#bfeaff');
-    g.addColorStop(1, '#1b5a34');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
+  // ---------------- Questions ----------------
+  let pendingQuestion = null;
+  function normalizeAnswer(s){ return (s ?? '').toString().trim().replace(/\s+/g,''); }
+  function parseMaybeNumberOrFraction(s){
+    s = normalizeAnswer(s);
+    if (!s) return null;
+    if (s.includes('/')) {
+      const [a,b] = s.split('/');
+      const na = Number(a), nb = Number(b);
+      if (!Number.isFinite(na) || !Number.isFinite(nb) || nb === 0) return null;
+      return na/nb;
+    }
+    const n = Number(s);
+    return Number.isFinite(n) ? n : null;
+  }
 
-    // distant hills
-    ctx.fillStyle = 'rgba(20,120,60,.35)';
+  function gradeParams(g){
+    if (g === "Grade 4") return { mulMax: 12, addMax: 600, subMax: 700, divMax: 12, decPlaces: 1 };
+    if (g === "Grade 6") return { mulMax: 20, addMax: 1400, subMax: 1500, divMax: 18, decPlaces: 2 };
+    return { mulMax: 15, addMax: 900, subMax: 999, divMax: 14, decPlaces: 1 };
+  }
+
+  function makeQuestion(grade, type){
+    const gp = gradeParams(grade);
+    const simple = (text, ans)=>({ text, check:(s)=>parseMaybeNumberOrFraction(s) === ans });
+
+    const Q = [];
+    if (type === "Numbers") {
+      Q.push(()=>{ const a=randi(100,gp.addMax), b=randi(50,gp.addMax-50); return simple(`What is ${a} + ${b}?`, a+b); });
+      Q.push(()=>{ const a=randi(200,gp.subMax), b=randi(20, Math.min(250,a-1)); return simple(`What is ${a} − ${b}?`, a-b); });
+      Q.push(()=>{
+        const places = gp.decPlaces;
+        const scale = Math.pow(10, places);
+        const a = randi(12,99)/scale*(places===2?1:10);
+        const b = randi(12,99)/scale*(places===2?1:10);
+        const ans = Math.round((a+b)*100)/100;
+        return { text:`What is ${a.toFixed(places)} + ${b.toFixed(places)}?`, check:(s)=>{
+          const n = parseMaybeNumberOrFraction(s);
+          return n !== null && Math.abs(n-ans) < 1e-9;
+        }};
+      });
+      Q.push(()=>{
+        const m=[3,4,5,6,7,8,9,10,12][randi(0,9)];
+        const k=randi(2,12);
+        const n=m*k;
+        return simple(`What is the next multiple of ${m} after ${n}?`, n+m);
+      });
+    }
+    if (type === "Geometry") {
+      Q.push(()=>{ const w=randi(4,grade==="Grade 6"?28:20), h=randi(3,grade==="Grade 6"?22:16); return simple(`A rectangle is ${w} by ${h}. Area?`, w*h); });
+      Q.push(()=>{ const w=randi(5,grade==="Grade 6"?30:22), h=randi(4,grade==="Grade 6"?24:18); return simple(`A rectangle is ${w} cm by ${h} cm. Perimeter (cm)?`, 2*(w+h)); });
+      Q.push(()=>{ const a=randi(20,160); return simple(`Angles on a straight line add to 180°. If one is ${a}°, the other is?`, 180-a); });
+      Q.push(()=>{ const a=randi(20,100), b=randi(20,100); return simple(`Triangle angles: ${a}° and ${b}°. Third angle?`, 180-a-b); });
+    }
+    if (type === "Operations") {
+      Q.push(()=>{ const a=randi(2,gp.mulMax), b=randi(2,gp.mulMax); return simple(`What is ${a} × ${b}?`, a*b); });
+      Q.push(()=>{ const b=randi(3,gp.divMax), ans=randi(4,grade==="Grade 6"?22:18); return simple(`What is ${b*ans} ÷ ${b}?`, ans); });
+      Q.push(()=>{ const a=randi(2,gp.mulMax), b=randi(2,gp.mulMax), c=randi(5,grade==="Grade 6"?60:35); return simple(`What is ${a} × ${b} + ${c}?`, a*b+c); });
+      Q.push(()=>{ const den=[4,5,6,8,10,12][randi(0,grade==="Grade 6"?6:4)], a=randi(1,den-1), b=randi(1,den-1); const exact=(a+b)/den;
+        return { text:`What is ${a}/${den} + ${b}/${den}? (fraction or decimal)`, check:(s)=>{
+          const n=parseMaybeNumberOrFraction(s);
+          return n!==null && Math.abs(n-exact) < 1e-9;
+        }};
+      });
+    }
+    return (Q.length ? Q[randi(0,Q.length)]() : simple("What is 9 + 7?",16));
+  }
+
+  function showQuestion({ who, reason, q }){
+    game.state = 'question';
+    qOverlay.style.display = 'flex';
+    qMsgEl.textContent = '';
+    pendingQuestion = { who, reason, q };
+
+    qPromptEl.textContent = q.text;
+    qReasonEl.textContent = reason;
+    whoName.textContent = who.id;
+    whoDot.style.background = who.color;
+
+    qAnsEl.value = '';
+    qAnsEl.focus();
+  }
+
+  function closeQuestion(){
+    qOverlay.style.display = 'none';
+    game.state = 'play';
+    pendingQuestion = null;
+  }
+
+  function submitAnswer(force=null){
+    if (!pendingQuestion) return;
+    const ok = (force !== null) ? force : pendingQuestion.q.check(qAnsEl.value);
+
+    qMsgEl.textContent = ok ? "✅ Correct!" : "❌ Not quite.";
+    qMsgEl.style.color = ok ? "rgba(140,255,170,.95)" : "rgba(255,160,160,.95)";
+
+    setTimeout(() => {
+      const onResolve = pendingQuestion.q.onResolve;
+      closeQuestion();
+      if (typeof onResolve === 'function') onResolve(ok);
+    }, 420);
+  }
+
+  qBtn.addEventListener('click', ()=>submitAnswer());
+  qAnsEl.addEventListener('keydown', (e)=>{
+    if (e.key === 'Enter') submitAnswer();
+    if (e.key === 'Escape') submitAnswer(false);
+  });
+
+  // ---------------- Buffs ----------------
+  const BUFFS = [
+    { key:'speed',     label:'Superspeed (10s)',      rarity:1.00, duration:10000, kind:'speed',  positive:true },
+    { key:'jump',      label:'Higher Jumps (10s)',    rarity:1.00, duration:10000, kind:'jump',   positive:true },
+    { key:'both',      label:'Jump + Speed (10s)',    rarity:0.45, duration:10000, kind:'both',   positive:true },
+    { key:'swapIt',    label:'Make other “it”',       rarity:0.12, duration:0,     kind:null,     positive:true },
+    { key:'invert',    label:'Invert Controls (10s)', rarity:0.55, duration:10000, kind:'invert', positive:false, harmful:true },
+    { key:'teleport',  label:'Teleporter',           rarity:0.70, duration:0,     kind:null,     positive:true },
+    { key:'slowEnemy', label:'Slow Enemy (10s)',      rarity:0.65, duration:10000, kind:'slow',   positive:true, appliesToEnemy:true }
+  ];
+  function weightedPick(items){
+    const total = items.reduce((s,it)=>s+it.rarity,0);
+    let r = Math.random()*total;
+    for (const it of items) { r -= it.rarity; if (r<=0) return it; }
+    return items[items.length-1];
+  }
+  function randomSafeSpot(w,h){
+    for (let i=0;i<60;i++){
+      const x = rand(120, W-120-w);
+      const y = rand(60, H-140-h);
+      const test = { x,y,w,h };
+      if (x < 120 || x+w > W-120) continue;
+      let ok=true;
+      for (const p of game.level.platforms) if (aabb(test,p)) { ok=false; break; }
+      if (ok) return { x,y };
+    }
+    return { x:(W/2)-w/2, y:80 };
+  }
+  function spawnBuff(){
+    const b = weightedPick(BUFFS);
+    for (let tries=0; tries<30; tries++){
+      const x = rand(140, W-140);
+      const y = rand(80, H-240);
+      const rect = { x,y,w:26,h:26 };
+      if (P1 && aabb(rect,P1)) continue;
+      if (P2 && aabb(rect,P2)) continue;
+      let bad=false;
+      for (const p of game.level.platforms) if (aabb(rect,p)) { bad=true; break; }
+      if (bad) continue;
+      game.buffsOnMap.push({ type:b.key, label:b.label, x,y,w:26,h:26, bob:Math.random()*10 });
+      return;
+    }
+  }
+  function applyBuffResult(collector, key, correct){
+    const enemy = (collector===P1)?P2:P1;
+    const buff = BUFFS.find(x=>x.key===key);
+    if (!buff) return;
+
+    const overrideCollector = ()=>clearEffect(collector);
+    const overrideEnemy = ()=>clearEffect(enemy);
+
+    if (buff.positive) {
+      if (!correct) return;
+
+      if (key === 'teleport') {
+        overrideCollector();
+        const spot = randomSafeSpot(collector.w, collector.h);
+        collector.x = spot.x; collector.y = spot.y; collector.vx=0; collector.vy=0;
+        return;
+      }
+      if (key === 'swapIt') {
+        overrideCollector();
+        collector.isIt = false;
+        enemy.isIt = true;
+        return;
+      }
+      if (key === 'slowEnemy') {
+        overrideEnemy();
+        setEffect(enemy, 'slow', buff.duration);
+        return;
+      }
+      overrideCollector();
+      setEffect(collector, buff.kind, buff.duration);
+      return;
+    }
+
+    if (buff.harmful && key === 'invert') {
+      if (correct) { overrideEnemy(); setEffect(enemy,'invert',buff.duration); }
+      else { overrideCollector(); setEffect(collector,'invert',buff.duration); }
+    }
+  }
+  function tryCollectBuff(p){
+    if (!p) return;
+    for (let i=0;i<game.buffsOnMap.length;i++){
+      const b = game.buffsOnMap[i];
+      if (!aabb(p,b)) continue;
+      game.buffsOnMap.splice(i,1);
+
+      const q = makeQuestion(game.config.grade, game.config.qtype);
+      const icon = game.level.buffIcons[b.type] || '★';
+      showQuestion({
+        who: p,
+        reason: `${icon} ${b.label}`,
+        q: { text:q.text, check:q.check, onResolve:(ok)=>applyBuffResult(p,b.type,ok) }
+      });
+      return;
+    }
+  }
+
+  // ---------------- Tag ----------------
+  function initiatorOfCollision(A,B){
+    const acx=A.x+A.w/2, acy=A.y+A.h/2;
+    const bcx=B.x+B.w/2, bcy=B.y+B.h/2;
+    const sx=bcx-acx, sy=bcy-acy;
+    const rvx=A.vx-B.vx, rvy=A.vy-B.vy;
+    const dot=rvx*sx + rvy*sy;
+    if (dot>0) return A;
+    if (dot<0) return B;
+    const as=A.vx*A.vx + A.vy*A.vy;
+    const bs=B.vx*B.vx + B.vy*B.vy;
+    return as>=bs ? A : B;
+  }
+  function tryStartTagQuestion(initiator, other){
+    const itPlayer = (P1 && P1.isIt) ? P1 : P2;
+    if (!initiator || !other || initiator !== itPlayer) return;
+    if (initiator.tagCooldown > 0) return;
+
+    initiator.tagCooldown = 700;
+    const q = makeQuestion(game.config.grade, game.config.qtype);
+    showQuestion({
+      who: initiator,
+      reason: 'Tag attempt',
+      q: { text:q.text, check:q.check, onResolve:(ok)=>{ if (ok){ initiator.isIt=false; other.isIt=true; } } }
+    });
+  }
+
+  // ---------------- Drawing ----------------
+  function roundedRect(x,y,w,h,r){
+    r = Math.min(r,w/2,h/2);
     ctx.beginPath();
-    ctx.moveTo(0, H*0.65);
-    for (let x = 0; x <= W; x += 80) {
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function drawParkBG(t){
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#78c8ff');
+    g.addColorStop(0.45,'#bfeaff');
+    g.addColorStop(1,'#1b5a34');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    ctx.fillStyle='rgba(20,120,60,.35)';
+    ctx.beginPath();
+    ctx.moveTo(0,H*0.65);
+    for (let x=0;x<=W;x+=80){
       ctx.quadraticCurveTo(x+40, H*0.56 + 12*Math.sin((t/900)+x/180), x+80, H*0.65);
     }
-    ctx.lineTo(W, H);
-    ctx.lineTo(0, H);
-    ctx.closePath();
-    ctx.fill();
+    ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
 
-    // trees
-    function tree(x, y, s) {
-      // trunk
-      ctx.fillStyle = 'rgba(70,40,20,.75)';
-      ctx.fillRect(x - 6*s, y, 12*s, 44*s);
-      // leaves
-      ctx.fillStyle = 'rgba(30,140,70,.85)';
-      ctx.beginPath();
-      ctx.arc(x, y, 22*s, 0, Math.PI*2);
-      ctx.arc(x - 18*s, y + 8*s, 18*s, 0, Math.PI*2);
-      ctx.arc(x + 18*s, y + 8*s, 18*s, 0, Math.PI*2);
-      ctx.fill();
-    }
-    tree(90, 220, 1.0);
-    tree(W-120, 240, 1.15);
-    tree(220, 270, 0.9);
-    tree(W-240, 280, 0.95);
+    ctx.fillStyle='rgba(25,120,55,.92)';
+    ctx.fillRect(0, H-game.level.groundH, W, game.level.groundH);
 
-    // ground grass
-    ctx.fillStyle = 'rgba(25,120,55,.92)';
-    ctx.fillRect(0, H - ground.h, W, ground.h);
-
-    // subtle texture dots
-    ctx.globalAlpha = 0.12;
-    ctx.fillStyle = '#000';
-    for (let i = 0; i < 300; i++) {
-      const x = (i*37) % W;
-      const y = H - ground.h + ((i*91) % ground.h);
-      ctx.fillRect(x, y, 2, 2);
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  function drawPlatforms() {
-    for (const p of platforms) {
-      if (p === ground) continue;
-      // platform body
-      ctx.fillStyle = 'rgba(35,160,80,.95)';
-      drawRoundedRect(p.x, p.y, p.w, p.h, 10);
-      // top highlight
-      ctx.fillStyle = 'rgba(255,255,255,.12)';
-      drawRoundedRect(p.x, p.y, p.w, Math.max(6, p.h*0.35), 10);
-      // little "moss" bumps
-      ctx.globalAlpha = 0.25;
-      ctx.fillStyle = '#000';
-      for (let i = 0; i < Math.floor(p.w/38); i++) {
-        ctx.beginPath();
-        ctx.arc(p.x + 20 + i*38, p.y + 4, 7, 0, Math.PI*2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    // ground top edge
-    ctx.fillStyle = 'rgba(255,255,255,.10)';
-    ctx.fillRect(0, H - ground.h, W, 5);
-  }
-
-  function drawLaunchPads() {
-    for (const lp of launchPads) {
-      ctx.fillStyle = 'rgba(255,255,255,.16)';
-      drawRoundedRect(lp.x, lp.y, lp.w, lp.h, 10);
-
-      ctx.fillStyle = 'rgba(255,255,255,.10)';
-      drawRoundedRect(lp.x + 6, lp.y + 3, lp.w - 12, lp.h - 6, 10);
-
-      ctx.fillStyle = 'rgba(255,255,255,.92)';
-      ctx.font = '16px system-ui';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('⇧', lp.x + lp.w/2, lp.y + lp.h/2 + 1);
-    }
-  }
-
-  function drawPlayer(p) {
-    // shadow
-    ctx.globalAlpha = 0.22;
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.ellipse(p.x + p.w/2, p.y + p.h + 6, 18, 6, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-
-    // body
-    ctx.fillStyle = p.color;
-    drawRoundedRect(p.x, p.y, p.w, p.h, 10);
-
-    // face
-    ctx.fillStyle = 'rgba(255,255,255,.88)';
-    const eyeY = p.y + 16;
-    const eyeX = p.x + (p.facing > 0 ? 22 : 12);
-    ctx.beginPath();
-    ctx.arc(eyeX, eyeY, 3, 0, Math.PI*2);
-    ctx.fill();
-
-    // outline "it"
-    if (p.isIt) {
-      ctx.strokeStyle = 'rgba(255,215,80,.95)';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(p.x - 3, p.y - 3, p.w + 6, p.h + 6);
-      ctx.lineWidth = 1;
-    }
-
-    // buff indicators
-    const icons = [];
-    if (p.speedBoost > 0) icons.push('⚡');
-    if (p.jumpBoost > 0) icons.push('🦘');
-    if (p.invert > 0) icons.push('🔁');
-    if (p.slow > 0) icons.push('🧊');
-
-    if (icons.length) {
-      ctx.font = '18px system-ui';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillStyle = 'rgba(255,255,255,.95)';
-      ctx.fillText(icons.join(' '), p.x + p.w/2, p.y - 6);
-    }
-  }
-
-  function drawBuffs(t) {
-    ctx.font = '18px system-ui';
+    ctx.save();
+    ctx.globalAlpha = 0.10;
+    ctx.fillStyle = '#fff';
+    ctx.font = '900 90px system-ui';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    ctx.fillText('PARK', W/2, 120);
+    ctx.restore();
+  }
 
-    for (const b of buffsOnMap) {
+  function drawSpaceBG(t){
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#040615');
+    g.addColorStop(0.6,'#070a22');
+    g.addColorStop(1,'#120827');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    for (let i=0;i<240;i++){
+      const x=(i*79)%W;
+      const y=(i*137)%(H-80);
+      const tw=0.25+0.75*Math.abs(Math.sin(t/850 + i*0.9));
+      ctx.globalAlpha=0.12+0.55*tw;
+      ctx.fillStyle='white';
+      ctx.fillRect(x,y,2,2);
+    }
+    ctx.globalAlpha=1;
+
+    function blob(x,y,r,c){
+      ctx.save();
+      ctx.globalAlpha=0.28;
+      const grd=ctx.createRadialGradient(x,y,0,x,y,r);
+      grd.addColorStop(0,c);
+      grd.addColorStop(1,'transparent');
+      ctx.fillStyle=grd;
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+    blob(W*0.26,H*0.32,240,'rgba(170,120,255,.95)');
+    blob(W*0.74,H*0.38,260,'rgba(120,210,255,.95)');
+
+    ctx.fillStyle='rgba(36,36,52,.92)';
+    ctx.fillRect(0, H-game.level.groundH, W, game.level.groundH);
+
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.fillStyle = '#fff';
+    ctx.font = '900 90px system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('SPACE', W/2, 120);
+    ctx.restore();
+  }
+
+  function drawPlatforms(){
+    for (const p of game.level.platforms) {
+      if (p.kind === 'ground') continue;
+      if (game.level.theme === 'park') {
+        ctx.fillStyle='rgba(35,160,80,.95)';
+        roundedRect(p.x,p.y,p.w,p.h,10); ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,.12)';
+        roundedRect(p.x,p.y,p.w,Math.max(6,p.h*0.35),10); ctx.fill();
+      } else {
+        ctx.fillStyle='rgba(100,100,170,.38)';
+        roundedRect(p.x,p.y,p.w,p.h,10); ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,.10)';
+        roundedRect(p.x,p.y,p.w,Math.max(6,p.h*0.35),10); ctx.fill();
+        ctx.strokeStyle='rgba(170,120,255,.30)';
+        ctx.lineWidth=2;
+        ctx.strokeRect(p.x+1,p.y+1,p.w-2,p.h-2);
+        ctx.lineWidth=1;
+      }
+    }
+  }
+
+  function drawLaunchPads(){
+    for (const lp of game.level.pads) {
+      ctx.save();
+      ctx.fillStyle='rgba(255,255,255,.16)';
+      roundedRect(lp.x,lp.y,lp.w,lp.h,10); ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,.10)';
+      roundedRect(lp.x+6,lp.y+3,lp.w-12,lp.h-6,10); ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,.92)';
+      ctx.font='16px system-ui';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('⇧', lp.x+lp.w/2, lp.y+lp.h/2+1);
+      ctx.restore();
+    }
+  }
+
+  function drawBuffs(t){
+    ctx.save();
+    ctx.font='18px system-ui';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    for (const b of game.buffsOnMap) {
       b.bob += 0.06;
       const bobY = Math.sin(b.bob + t/500) * 4;
 
-      // glow
-      ctx.globalAlpha = 0.20;
-      ctx.fillStyle = '#fff';
+      ctx.globalAlpha=0.18;
+      ctx.fillStyle='#fff';
       ctx.beginPath();
-      ctx.arc(b.x + b.w/2, b.y + b.h/2 + bobY, 18, 0, Math.PI*2);
+      ctx.arc(b.x+b.w/2, b.y+b.h/2+bobY, 18, 0, Math.PI*2);
       ctx.fill();
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha=1;
 
-      // token
-      ctx.fillStyle = 'rgba(0,0,0,.22)';
-      drawRoundedRect(b.x, b.y + bobY, b.w, b.h, 8);
+      ctx.fillStyle='rgba(0,0,0,.25)';
+      roundedRect(b.x, b.y+bobY, b.w, b.h, 8); ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,.14)';
+      roundedRect(b.x+2, b.y+2+bobY, b.w-4, b.h-4, 8); ctx.fill();
 
-      ctx.fillStyle = 'rgba(255,255,255,.14)';
-      drawRoundedRect(b.x+2, b.y+2 + bobY, b.w-4, b.h-4, 8);
-
-      ctx.fillStyle = 'rgba(255,255,255,.95)';
-      ctx.fillText(buffIcons[b.type] || '★', b.x + b.w/2, b.y + b.h/2 + bobY + 1);
+      const icon = game.level.buffIcons[b.type] || '★';
+      ctx.fillStyle='rgba(255,255,255,.95)';
+      ctx.fillText(icon, b.x+b.w/2, b.y+b.h/2+bobY+1);
     }
+    ctx.restore();
   }
 
-  function drawHUD() {
-    const itName = P1.isIt ? 'Blue' : 'Red';
-    const itDot = P1.isIt ? 'blue' : 'red';
+  function drawPlayer(p){
+    if (!p) return; // safety guard
+    ctx.save();
 
-    function fmt(ms) {
-      const s = Math.ceil(ms/1000);
-      return `${s}s`;
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(p.x+p.w/2, p.y+p.h/2, 26, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = p.color;
+    roundedRect(p.x,p.y,p.w,p.h,10); ctx.fill();
+
+    ctx.strokeStyle='rgba(0,0,0,.65)';
+    ctx.lineWidth=3;
+    ctx.strokeRect(p.x+0.5,p.y+0.5,p.w-1,p.h-1);
+
+    ctx.fillStyle='rgba(255,255,255,.92)';
+    const eyeX = p.x + (p.facing>0 ? 22 : 12);
+    const eyeY = p.y + 16;
+    ctx.beginPath(); ctx.arc(eyeX,eyeY,3,0,Math.PI*2); ctx.fill();
+
+    if (p.isIt) {
+      ctx.strokeStyle='rgba(255,215,80,.98)';
+      ctx.lineWidth=4;
+      ctx.strokeRect(p.x-3,p.y-3,p.w+6,p.h+6);
     }
 
-    const pLine = (p) => {
-      const bits = [];
-      if (p.speedBoost > 0) bits.push(`⚡ ${fmt(p.speedBoost)}`);
-      if (p.jumpBoost > 0) bits.push(`🦘 ${fmt(p.jumpBoost)}`);
-      if (p.invert > 0) bits.push(`🔁 ${fmt(p.invert)}`);
-      if (p.slow > 0) bits.push(`🧊 ${fmt(p.slow)}`);
-      return bits.length ? bits.join('  •  ') : '—';
-    };
+    ctx.font='900 12px system-ui';
+    ctx.textAlign='center'; ctx.textBaseline='bottom';
+    ctx.fillStyle='rgba(255,255,255,.95)';
+    ctx.fillText(p.id, p.x+p.w/2, p.y-6);
 
+    ctx.restore();
+  }
+
+  function drawHUD(){
+    if (!P1 || !P2) { hudEl.textContent = ''; return; }
+    const it = P1.isIt ? P1 : P2;
+    const lineFor = (p)=>{
+      const k = effectKind(p);
+      if (!k) return '—';
+      const s = Math.ceil(Math.max(0, p.effect.until - nowMs())/1000);
+      const label = ({speed:'Speed',jump:'Jump',both:'Speed+Jump',invert:'Invert',slow:'Slowed'})[k] || k;
+      return `${label} • ${s}s`;
+    };
     hudEl.innerHTML = `
       <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
-        <span class="pill"><span class="dot ${itDot}"></span> IT: ${itName}</span>
-        <span style="opacity:.85; font-weight:700;">Buffs spawn randomly</span>
+        <span class="pill"><span class="dot" style="background:${it.color};"></span> IT: ${it.id}</span>
+        <span style="opacity:.90; font-weight:1000;">${game.level.name} • ${game.config.grade} • ${game.config.qtype}</span>
       </div>
       <div style="display:grid; gap:6px;">
-        <div><b style="color:rgba(90,190,255,.95);">Blue</b> — ${pLine(P1)}</div>
-        <div><b style="color:rgba(255,120,120,.95);">Red</b> — ${pLine(P2)}</div>
+        <div><b style="color:${P1.color};">P1</b> — ${lineFor(P1)}</div>
+        <div><b style="color:${P2.color};">P2</b> — ${lineFor(P2)}</div>
       </div>
     `;
   }
 
-  // ---------- Main Loop ----------
-  let last = performance.now();
+  // ---------------- Update / Render ----------------
+  function update(dt){
+    if (game.state !== 'play') return;
 
-  function tick(now) {
-    const dt = clamp(now - last, 0, 33);
-    last = now;
+    updatePlayer(P1, dt);
+    updatePlayer(P2, dt);
 
-    if (!pausedForQuestion) {
-      updatePlayer(P1, dt);
-      updatePlayer(P2, dt);
-
-      // Spawn buffs every ~6–10 seconds, capped
-      buffSpawnTimer -= dt;
-      if (buffSpawnTimer <= 0 && buffsOnMap.length < 4) {
-        spawnBuff();
-        buffSpawnTimer = rand(6000, 10000);
-      }
-
-      // Collect buffs (triggers question)
-      if (!pausedForQuestion) {
-        tryCollectBuff(P1);
-      }
-      if (!pausedForQuestion) {
-        tryCollectBuff(P2);
-      }
-
-      // Player-player collision tag check
-      const overlapping = aabbOverlap(P1, P2);
-      if (overlapping && !lastPlayersOverlapping) {
-        // New collision start
-        const initiator = initiatorOfCollision(P1, P2);
-        const other = (initiator === P1) ? P2 : P1;
-
-        // Keep them from sticking together
-        // small push apart
-        const push = 10;
-        if (initiator.x < other.x) { initiator.x -= push; other.x += push; }
-        else { initiator.x += push; other.x -= push; }
-
-        // Tag question if initiator is IT
-        if (!pausedForQuestion) {
-          tryStartTagQuestion(initiator, other);
-        }
-      }
-      lastPlayersOverlapping = overlapping;
+    game.buffSpawnTimer -= dt;
+    if (game.buffSpawnTimer <= 0 && game.buffsOnMap.length < 4) {
+      spawnBuff();
+      game.buffSpawnTimer = rand(6000, 10000);
     }
 
-    // ---------- Render ----------
-    drawBackground(now);
-    drawPlatforms();
-    drawLaunchPads();
-    drawBuffs(now);
-    drawPlayer(P1);
-    drawPlayer(P2);
-    drawHUD();
+    tryCollectBuff(P1);
+    if (game.state !== 'play') return;
+    tryCollectBuff(P2);
 
-    requestAnimationFrame(tick);
+    const overlap = (P1 && P2) ? aabb(P1,P2) : false;
+    if (overlap && !game.lastOverlap) {
+      const initiator = initiatorOfCollision(P1,P2);
+      const other = (initiator===P1)?P2:P1;
+
+      const push = 10;
+      if (initiator.x < other.x) { initiator.x -= push; other.x += push; }
+      else { initiator.x += push; other.x -= push; }
+
+      tryStartTagQuestion(initiator, other);
+    }
+    game.lastOverlap = overlap;
   }
 
-  // ---------- Start ----------
-  buffSpawnTimer = rand(1500, 3500);
-  requestAnimationFrame(tick);
+  function render(t){
+    ctx.globalAlpha = 1;
+
+    if (game.level.theme === 'park') drawParkBG(t);
+    else drawSpaceBG(t);
+
+    drawPlatforms();
+    drawLaunchPads();
+    drawBuffs(t);
+
+    // Players always on top
+    drawPlayer(P1);
+    drawPlayer(P2);
+
+    drawHUD();
+  }
+
+  function tick(t){
+    try {
+      const dt = clamp(t - game.lastT, 0, 33);
+      game.lastT = t;
+      update(dt);
+      render(t);
+      requestAnimationFrame(tick);
+    } catch (err) {
+      showFatal(err);
+    }
+  }
+
+  // ---------------- Start Game ----------------
+  function startGame(){
+    showSplash(false);
+    game.state = 'play';
+    game.buffsOnMap = [];
+    game.buffSpawnTimer = rand(1400, 3200);
+    game.lastOverlap = false;
+    resetPlayers(false);
+  }
+
+  // ---------------- Boot ----------------
+  // ✅ KEY FIX: create players immediately so render never sees undefined
+  resetPlayers(true);
+
+  showSplash(true);
+  requestAnimationFrame((t)=>{ game.lastT = t; tick(t); });
 
 })();
 </script>
 </body>
 </html>
-
