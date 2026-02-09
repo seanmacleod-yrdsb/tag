@@ -21,7 +21,7 @@
 
     #ui {
       position: fixed; left: 14px; top: 12px; right: 14px;
-      display: flex; gap: 12px; align-items: flex-start; justify-content: space-between;
+      display: none; gap: 12px; align-items: flex-start; justify-content: space-between;
       pointer-events: none; z-index: 5;
       color: rgba(255,255,255,.92);
       text-shadow: 0 2px 12px rgba(0,0,0,.55);
@@ -196,7 +196,44 @@
     }
     #errTitle { font-weight: 1000; margin-bottom: 10px; }
     #errText { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; opacity:.92; }
-  </style>
+  
+    /* Timer (top center) */
+    #timerPanel{
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: 6;
+      text-align: center;
+      min-width: 124px;
+      height: 78px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      background: rgba(0,0,0,.28);
+      border: 0;
+      border-radius: 18px;
+      backdrop-filter: blur(6px);
+      color: rgba(255,255,255,.95);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    #timerPanel .title{
+      margin:0;
+      font-size: 12px;
+      font-weight: 1000;
+      letter-spacing: .4px;
+      opacity: .88;
+    }
+    #timerVal{
+      font-size: 32px;
+      font-weight: 1000;
+      letter-spacing: .6px;
+      margin-top: 4px;
+      color: rgba(255,255,255,.95);
+    }
+</style>
 </head>
 <body>
   <div id="ui">
@@ -217,7 +254,12 @@
     </div>
   </div>
 
-  <div id="wrap">
+  <div class="panel" id="timerPanel">
+    <div class="title">Elapsed</div>
+    <div id="timerVal">0:00</div>
+  </div>
+
+<div id="wrap">
     <canvas id="c" width="1100" height="650"></canvas>
   </div>
 
@@ -355,6 +397,9 @@
   const errOverlay = document.getElementById('errOverlay');
   const errTextEl = document.getElementById('errText');
 
+  const timerValEl = document.getElementById('timerVal');
+  const timerPanelEl = document.getElementById('timerPanel');
+
   // ---------------- Constants ----------------
   const BASE_W = 1100, BASE_H = 650;
   const W = BASE_W, H = BASE_H;
@@ -379,14 +424,21 @@
   const randi = (a,b)=>Math.floor(rand(a,b));
   const nowMs = ()=>performance.now();
 
+
+  function formatTime(ms){
+    const total = Math.max(0, Math.floor(ms/1000));
+    const m = Math.floor(total/60);
+    const s = total % 60;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+
+
   function aabb(a,b){
     return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
   }
 
   function showSplash(show){
     splash.style.display = show ? 'flex' : 'none';
-    helpPanel.classList.toggle('hidden', show);
-    hudPanel.classList.toggle('hidden', show);
   }
 
   function showFatal(err){
@@ -531,9 +583,34 @@
       groundH,
       pads,
       platforms,
-      buffIcons: {
+      
+obstacles: [
+  // Ground cover
+  { x: 110, y: H-groundH-80,  w: 120, h: 80,  type:'bush' },
+  { x: W*0.28, y: H-groundH-95, w: 140, h: 95, type:'bush' },
+
+  { x: W*0.18, y: H-groundH-140, w: 60,  h: 140, type:'tree' },
+  { x: W*0.82, y: H-groundH-150, w: 62,  h: 150, type:'tree' },
+
+  // Epic big tree: spans most of the canvas
+  { x: W*0.52-90, y: H-groundH-520, w: 180, h: 520, type:'bigTree' },
+
+  // Platform cover (non-solid, just visual occlusion)
+  // Left lower platform (y: H-170)
+  { x: 210, y: (H-170)-120, w: 96, h: 120, type:'bench' },
+  // Right lower platform (y: H-170)
+  { x: W-210-96, y: (H-170)-120, w: 96, h: 120, type:'bench' },
+  // Mid large platform (y: H-270)
+  { x: (W/2)-40, y: (H-270)-92, w: 80, h: 92, type:'rock' },
+  // Higher mid platform (y: H-450)
+  { x: (W/2)-10, y: (H-450)-104, w: 74, h: 104, type:'bush' },
+
+  { x: W*0.70, y: H-groundH-78,  w: 115, h: 78, type:'bush' },
+  { x: W*0.06, y: H-groundH-125, w: 56,  h: 125, type:'tree' },
+],
+buffIcons: {
         speed: '⚡', jump: '🦘', both: '✨',
-        swapIt: '👑', invert: '🔁', teleport: '🌀', slowEnemy: '🧊'
+        swapIt: '👑', invert: '🔁', teleport: '🌀', slowEnemy: '🧊', invis: '👻'
       }
     };
   }
@@ -569,9 +646,33 @@
       groundH,
       pads,
       platforms,
-      buffIcons: {
+      
+obstacles: [
+  // Ground-ish cover
+  { x: W*0.10, y: H-groundH-140, w: 72,  h: 140, type:'crate' },
+  { x: W*0.34, y: H-groundH-95,  w: 120, h: 95,  type:'asteroid' },
+  { x: W*0.62, y: H-groundH-160, w: 86,  h: 160, type:'crate' },
+  { x: W*0.82, y: H-groundH-110, w: 110, h: 110, type:'asteroid' },
+
+  // Platform cover (aligned to platform tops)
+  // Left low platform (y: H-190)
+  { x: (W/2)-250, y: (H-190)-70, w: 70, h: 70, type:'asteroid' },
+  // Right low platform (y: H-190)
+  { x: (W/2)+180, y: (H-190)-86, w: 72, h: 86, type:'crate' },
+
+  // Mid platform (y: H-285)
+  { x: (W/2)-34, y: (H-285)-120, w: 120, h: 120, type:'planet' },
+
+  // Higher platforms
+  { x: 250, y: (H-360)-86, w: 72, h: 86, type:'crate' },
+  { x: W-250-120, y: (H-360)-70, w: 110, h: 70, type:'asteroid' },
+
+  // Tall "tower" cover (still good for ground hide)
+  { x: W*0.46, y: H-groundH-260, w: 64,  h: 260, type:'crate' },
+],
+buffIcons: {
         speed: '🚀', jump: '🌙', both: '✨',
-        swapIt: '👽', invert: '🌀', teleport: '🛸', slowEnemy: '🧊'
+        swapIt: '👽', invert: '🌀', teleport: '🛸', slowEnemy: '🧊', invis: '👻'
       }
     };
   }
@@ -580,23 +681,40 @@
     // Inverted world: gravity pulls upward. Players “stick” to undersides.
     const topH = 20;
     const bottomH = 48;
+    const groundH = bottomH;
 
     const ceiling = { x: 0, y: 0, w: W, h: topH, kind:'ceiling' };
     const floor   = { x: 0, y: H-bottomH, w: W, h: bottomH, kind:'ground' };
 
     // Put most platforms near the top so you can hang underneath them.
     const platforms = [
-      ceiling,
-      floor,
-      { x: 130, y: 90,  w: 260, h: 18 },
-      { x: W-130-260, y: 90, w: 260, h: 18 },
-      { x: (W/2)-220, y: 165, w: 440, h: 20 },
-      { x: 220, y: 255, w: 200, h: 16 },
-      { x: W-220-200, y: 255, w: 200, h: 16 },
-      { x: (W/2)-140, y: 330, w: 280, h: 16 },
-      { x: (W/2)-380, y: 420, w: 180, h: 14 },
-      { x: (W/2)+200, y: 420, w: 180, h: 14 },
-    ];
+
+ceiling,
+floor,
+
+// Top layer (main hang points)
+{ x: 130, y: 90,  w: 260, h: 18 },
+{ x: W-130-260, y: 90, w: 260, h: 18 },
+
+// Wide central anchor
+{ x: (W/2)-260, y: 180, w: 520, h: 20 },
+
+// Mid layer (staggered for easier chaining)
+{ x: 170, y: 270, w: 230, h: 16 },            // left: a bit higher
+{ x: W-170-230, y: 310, w: 230, h: 16 },      // right: a bit lower
+
+// Center connectors (small steps to bridge the gap)
+{ x: (W/2)-260, y: 340, w: 160, h: 14 },
+{ x: (W/2)+100, y: 340, w: 160, h: 14 },
+
+// LOWER platforms (toward bottom = “higher” feeling) — staggered
+{ x: (W/2)-360, y: 420, w: 210, h: 14 },      // left: lower
+{ x: (W/2)+150, y: 390, w: 210, h: 14 },      // right: higher
+
+// Side-connected lower corner routes (attach to walls)
+{ x: 0,     y: 520, w: 240, h: 14 },
+{ x: W-240, y: 520, w: 240, h: 14 },
+];
 
     // Launchpads: provide top pads (push “down”), and also bottom pads for when Normalize is active.
     const pads = [
@@ -620,10 +738,39 @@
       topH,
       pads,
       platforms,
-      buffIcons: {
+      
+obstacles: [
+  // In Inverted, players hang under platforms.
+  // We align cover to the *bottom* of platforms (platform.y + platform.h) and extend downward.
+
+  // Under left top platform (y:90,h:18 → bottom 108)
+  { x: 170, y: 108, w: 84, h: 220, type:'pillar' },
+
+  // Under central anchor (y:180,h:20 → bottom 200)
+  { x: (W/2)-36, y: 200, w: 140, h: 86, type:'pillar' },
+
+  // Under right top platform
+  { x: W-170-84, y: 108, w: 84, h: 240, type:'pillar' },
+
+  // Under mid left (y:270,h:16 → bottom 286)
+  { x: 260, y: 286, w: 70, h: 180, type:'pillar' },
+
+  // Under mid right (y:310,h:16 → bottom 326)
+  { x: W-260-76, y: 326, w: 76, h: 180, type:'pillar' },
+
+  // Under center connectors (y:340,h:14 → bottom 354)
+  { x: (W/2)-220, y: 354, w: 64, h: 130, type:'pillar' },
+  { x: (W/2)+156, y: 354, w: 64, h: 130, type:'pillar' },
+
+  // Under staggered lower platforms
+  { x: (W/2)-330, y: 434, w: 64, h: 150, type:'pillar' }, // left lower (420+14)
+  { x: (W/2)+280, y: 404, w: 64, h: 150, type:'pillar' }, // right higher (390+14)
+],
+buffIcons: {
         speed:'⚡', jump:'🦇', both:'✨',
         swapIt:'👑', invert:'🔁', teleport:'🌀', slowEnemy:'🧊',
-        normalize:'🧭'
+        normalize:'🧭',
+        invis:'👻'
       }
     };
   }
@@ -638,7 +785,10 @@
     lastOverlap: false,
     lastT: nowMs(),
     globalEffect: { kind:null, until:0 }, // e.g., normalizeWorld (Inverted only)
-    tagLatch: false
+    tagLatch: false,
+    startTimeMs: 0,
+    headstartUntil: 0,
+    headstartItId: ''
   };
 
   function globalActive(kind){
@@ -670,6 +820,12 @@
   lvlSpace.addEventListener('click', ()=>setLevelChoice("Space"));
   lvlInv.addEventListener('click', ()=>setLevelChoice("Inverted"));
   setLevelChoice("Park");
+
+  // Double-click a level card to start immediately (Start button still works)
+  lvlPark.addEventListener('dblclick', () => { setLevelChoice("Park"); startBtn.click(); });
+  lvlSpace.addEventListener('dblclick', () => { setLevelChoice("Space"); startBtn.click(); });
+  lvlInv.addEventListener('dblclick', () => { setLevelChoice("Inverted"); startBtn.click(); });
+
 
   const p1DD = makeColorDropdown(document.getElementById('p1DD'), "Blue");
   const p2DD = makeColorDropdown(document.getElementById('p2DD'), "Red");
@@ -825,12 +981,15 @@
     p.tagCooldown = Math.max(0, p.tagCooldown - dt);
     p._launchCD = Math.max(0, p._launchCD - dt);
 
+
+    const frozenByHeadstart = (game.headstartUntil && nowMs() < game.headstartUntil && p.id === game.headstartItId);
+
     const invDebuff = invertedControlsDebuff(p) ? -1 : 1;
     const invLevel = horizInvertedByLevel() ? -1 : 1;
 
-    const left = keys.has(p.controls.left);
-    const right = keys.has(p.controls.right);
-    const jump = keys.has(p.controls.jump);
+    const left = !frozenByHeadstart && keys.has(p.controls.left);
+    const right = !frozenByHeadstart && keys.has(p.controls.right);
+    const jump = !frozenByHeadstart && keys.has(p.controls.jump);
 
     let move = 0;
     if (left) move -= 1;
@@ -840,6 +999,7 @@
     const targetVx = move * speedFor(p);
     const accel = 2200;
     p.vx += clamp(targetVx - p.vx, -accel*(dt/1000), accel*(dt/1000));
+    if (frozenByHeadstart) { p.vx *= 0.80; }
     if (move !== 0) p.facing = Math.sign(move);
 
     // Jump direction depends on gravity:
@@ -867,12 +1027,13 @@
     p.x += p.vx * (dt/1000);
     p.y += p.vy * (dt/1000);
 
-    // bounds
-    p.x = clamp(p.x, 0, W - p.w);
+    // horizontal wrap-around
+    if (p.x < -p.w) p.x = W;
+    else if (p.x > W) p.x = -p.w;
 
     // collide platforms
     const gravS = gSign;
-    for (const plat of game.level.platforms) {
+    for (const plat of (game.level.platforms)) {
       if (aabb(p, plat)) resolveAABB(p, plat, gravS);
     }
 
@@ -996,6 +1157,7 @@
 
   // ---------------- Buffs ----------------
   const BUFFS_BASE = [
+    { key:'invis',     label:'Invisibility (5s)',     rarity:0.70, duration:5000,  kind:'invis',  positive:true },
     { key:'speed',     label:'Superspeed (10s)',      rarity:1.00, duration:10000, kind:'speed',  positive:true },
     { key:'jump',      label:'Higher Jumps (10s)',    rarity:1.00, duration:10000, kind:'jump',   positive:true },
     { key:'both',      label:'Jump + Speed (10s)',    rarity:0.45, duration:10000, kind:'both',   positive:true },
@@ -1028,6 +1190,7 @@
       const test = { x,y,w,h };
       let ok = true;
       for (const p of game.level.platforms) if (aabb(test,p)) { ok=false; break; }
+      for (const o of (game.level.obstacles||[])) if (aabb(test,o)) { ok=false; break; }
       if (ok) return { x,y };
     }
     return { x: (W/2)-w/2, y: 80 };
@@ -1182,6 +1345,30 @@
     g.addColorStop(1,'#1b5a34');
     ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
 
+
+// Skyline (background decoration)
+ctx.save();
+ctx.globalAlpha = 0.16;
+ctx.fillStyle = '#0a2c3f';
+const baseY = H*0.62;
+for (let i=0;i<18;i++){
+  const bw = 28 + ((i*37)%40);
+  const bh = 60 + ((i*53)%120);
+  const bx = (i/18)*W + ((i*17)%20) - 10;
+  ctx.fillRect(bx, baseY-bh, bw, bh);
+
+  // tiny windows
+  ctx.globalAlpha = 0.07;
+  ctx.fillStyle = '#ffffff';
+  for (let wy=baseY-bh+12; wy<baseY-14; wy+=16){
+    ctx.fillRect(bx+6, wy, 4, 6);
+    ctx.fillRect(bx+14, wy, 4, 6);
+  }
+  ctx.globalAlpha = 0.16;
+  ctx.fillStyle = '#0a2c3f';
+}
+ctx.restore();
+
     ctx.fillStyle='rgba(20,120,60,.35)';
     ctx.beginPath();
     ctx.moveTo(0,H*0.65);
@@ -1219,6 +1406,35 @@
       ctx.fillRect(x,y,2,2);
     }
     ctx.globalAlpha=1;
+
+
+// Space decorations (background)
+ctx.save();
+// big ringed planet (now used as a cover object in obstacles)
+// small sun
+ctx.globalAlpha = 0.22;
+ctx.fillStyle = '#ffd27a';
+ctx.beginPath(); ctx.arc(W*0.16, H*0.18, 26, 0, Math.PI*2); ctx.fill();
+
+// tiny rocket
+ctx.globalAlpha = 0.24;
+const rx = W*0.26, ry = H*0.32;
+ctx.fillStyle = '#ffffff';
+roundedRect(rx, ry, 18, 40, 8); ctx.fill();
+ctx.fillStyle = '#ff7a7a';
+ctx.beginPath(); ctx.moveTo(rx+9, ry-14); ctx.lineTo(rx, ry+8); ctx.lineTo(rx+18, ry+8); ctx.closePath(); ctx.fill();
+ctx.fillStyle = '#7bd4ff';
+ctx.beginPath(); ctx.arc(rx+9, ry+20, 5, 0, Math.PI*2); ctx.fill();
+
+// little alien
+ctx.globalAlpha = 0.22;
+const ax = W*0.58, ay = H*0.30;
+ctx.fillStyle = '#7bffb2';
+ctx.beginPath(); ctx.ellipse(ax, ay, 12, 16, 0, 0, Math.PI*2); ctx.fill();
+ctx.fillStyle = '#0b1220';
+ctx.beginPath(); ctx.arc(ax-4, ay-2, 3, 0, Math.PI*2); ctx.fill();
+ctx.beginPath(); ctx.arc(ax+4, ay-2, 3, 0, Math.PI*2); ctx.fill();
+ctx.restore();
 
     function blob(x,y,r,c){
       ctx.save();
@@ -1268,14 +1484,18 @@
     ctx.fillStyle='rgba(255,255,255,.06)';
     ctx.fillRect(0,0,W,20);
 
-    // watermark
+    // watermark (flipped/upside-down for the Inverted level)
     ctx.save();
     ctx.globalAlpha = 0.12;
     ctx.fillStyle = '#ffffff';
     ctx.font = '900 80px system-ui';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(worldIsNormalized() ? 'INVERTED (NORMALIZED)' : 'INVERTED', W/2, 120);
+    const wm = worldIsNormalized() ? 'INVERTED (NORMALIZED)' : 'INVERTED';
+    ctx.translate(W/2, 120);
+    ctx.rotate(Math.PI);   // upside-down
+    ctx.scale(-1, 1);      // mirrored
+    ctx.fillText(wm, 0, 0);
     ctx.restore();
   }
 
@@ -1355,10 +1575,199 @@
     ctx.restore();
   }
 
-  function drawPlayer(p){
+  
+  function drawObstacle(o, alpha=1){
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  if (game.level.theme === 'park') {
+    if (o.type === 'bush') {
+      // Bush: wide, opaque, great for hiding
+      ctx.fillStyle = '#1f7a3a';
+      roundedRect(o.x, o.y + o.h*0.20, o.w, o.h*0.80, 26); ctx.fill();
+      ctx.beginPath();
+      ctx.arc(o.x + o.w*0.18, o.y + o.h*0.45, o.h*0.38, 0, Math.PI*2);
+      ctx.arc(o.x + o.w*0.45, o.y + o.h*0.35, o.h*0.48, 0, Math.PI*2);
+      ctx.arc(o.x + o.w*0.74, o.y + o.h*0.46, o.h*0.40, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha *= 0.35;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(o.x + o.w*0.12, o.y + o.h*0.55, o.w*0.18, o.h*0.08);
+      ctx.globalAlpha = alpha;
+
+    } else if (o.type === 'bench') {
+      // Park bench (opaque cover on platforms)
+      ctx.fillStyle = '#7a4a28';
+      roundedRect(o.x, o.y + o.h*0.45, o.w, o.h*0.55, 10); ctx.fill();
+      ctx.fillStyle = '#5a341d';
+      roundedRect(o.x+6, o.y + o.h*0.55, o.w-12, o.h*0.18, 8); ctx.fill();
+      ctx.fillStyle = '#2b1a10';
+      ctx.fillRect(o.x+10, o.y + o.h*0.80, 8, o.h*0.20);
+      ctx.fillRect(o.x+o.w-18, o.y + o.h*0.80, 8, o.h*0.20);
+      ctx.globalAlpha *= 0.18;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(o.x+8, o.y + o.h*0.58, o.w*0.35, o.h*0.10);
+      ctx.globalAlpha = alpha;
+    } else if (o.type === 'rock') {
+      // Rock (opaque cover)
+      ctx.fillStyle = '#3a4d52';
+      roundedRect(o.x, o.y, o.w, o.h, 18); ctx.fill();
+      ctx.globalAlpha *= 0.16;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(o.x+o.w*0.35, o.y+o.h*0.35, Math.min(o.w,o.h)*0.18, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = alpha;
+    } else if (o.type === 'bigTree') {
+      // Big tree: wide trunk + canopy that reaches high (can hide from platforms too)
+      const trunkW = Math.max(80, o.w*0.52);
+      const trunkX = o.x + (o.w - trunkW)/2;
+      const trunkH = o.h*0.70;
+      const trunkY = o.y + o.h - trunkH;
+
+      ctx.fillStyle = '#5a3a1b';
+      roundedRect(trunkX, trunkY, trunkW, trunkH, 18); ctx.fill();
+
+      // canopy
+      ctx.fillStyle = '#1d7b3a';
+      ctx.beginPath();
+      ctx.arc(o.x + o.w*0.50, o.y + o.h*0.26, o.w*0.40, 0, Math.PI*2);
+      ctx.arc(o.x + o.w*0.25, o.y + o.h*0.33, o.w*0.32, 0, Math.PI*2);
+      ctx.arc(o.x + o.w*0.76, o.y + o.h*0.34, o.w*0.34, 0, Math.PI*2);
+      ctx.arc(o.x + o.w*0.38, o.y + o.h*0.15, o.w*0.28, 0, Math.PI*2);
+      ctx.arc(o.x + o.w*0.62, o.y + o.h*0.14, o.w*0.28, 0, Math.PI*2);
+      ctx.fill();
+
+      // subtle highlight
+      ctx.globalAlpha *= 0.22;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(o.x + o.w*0.38, o.y + o.h*0.22, o.w*0.18, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = alpha;
+    } else {
+      // Regular tree
+      const trunkW = Math.max(22, o.w*0.36);
+      const trunkX = o.x + (o.w - trunkW)/2;
+      const trunkH = o.h*0.62;
+      const trunkY = o.y + o.h - trunkH;
+
+      ctx.fillStyle = '#5a3a1b';
+      roundedRect(trunkX, trunkY, trunkW, trunkH, 10); ctx.fill();
+
+      ctx.fillStyle = '#1f7a3a';
+      ctx.beginPath();
+      ctx.arc(o.x + o.w*0.50, o.y + o.h*0.25, o.w*0.48, 0, Math.PI*2);
+      ctx.arc(o.x + o.w*0.28, o.y + o.h*0.35, o.w*0.38, 0, Math.PI*2);
+      ctx.arc(o.x + o.w*0.74, o.y + o.h*0.35, o.w*0.38, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.globalAlpha *= 0.18;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(o.x + o.w*0.35, o.y + o.h*0.25, o.w*0.16, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = alpha;
+    }
+  } else if (game.level.theme === 'space') {
+    if (o.type === 'asteroid') {
+      ctx.fillStyle = '#b57bff';
+      roundedRect(o.x, o.y, o.w, o.h, 18); ctx.fill();
+      ctx.globalAlpha *= 0.20;
+      ctx.fillStyle = '#ffffff';
+      for (let i=0;i<4;i++){
+        const cx = o.x + (0.22 + i*0.19)*o.w;
+        const cy = o.y + (0.28 + (i%2)*0.22)*o.h;
+        ctx.beginPath(); ctx.arc(cx, cy, 7 + i*2, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = 'rgba(255,255,255,.55)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(o.x+2, o.y+2, o.w-4, o.h-4);
+      ctx.lineWidth = 1;
+
+    } else if (o.type === 'planet') {
+      // Opaque ringed planet cover object (can hide behind)
+      const cx = o.x + o.w/2, cy = o.y + o.h/2;
+      const r = Math.min(o.w,o.h)*0.44;
+      ctx.fillStyle = '#7bd4ff';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+
+      // subtle band
+      ctx.globalAlpha *= 0.22;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.ellipse(cx-6, cy+4, r*0.85, r*0.28, -0.25, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = alpha;
+
+      // rings (still opaque enough to count as cover visually)
+      ctx.strokeStyle = 'rgba(255,255,255,.70)';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, r*1.55, r*0.55, -0.35, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+    } else {
+      // crate
+      ctx.fillStyle = '#62d6ff';
+      roundedRect(o.x, o.y, o.w, o.h, 12); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.7)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(o.x+2, o.y+2, o.w-4, o.h-4);
+
+      ctx.globalAlpha *= 0.22;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(o.x+8, o.y+10, o.w-16, 7);
+      ctx.globalAlpha = alpha;
+
+      ctx.lineWidth = 1;
+    }
+  } else {
+    // Inverted pillar (opaque)
+    ctx.fillStyle = '#ff8c4a';
+    roundedRect(o.x, o.y, o.w, o.h, 14); ctx.fill();
+    ctx.globalAlpha *= 0.20;
+    ctx.fillStyle = '#ffffff';
+    roundedRect(o.x+8, o.y+12, o.w-16, o.h-24, 12); ctx.fill();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = 'rgba(255,120,190,.65)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(o.x+2, o.y+2, o.w-4, o.h-4);
+    ctx.lineWidth = 1;
+  }
+
+  ctx.restore();
+}
+
+  
+function drawActors(){
+  // Painter's algorithm: draw things from back-to-front based on their bottom edge.
+  // This lets cover objects hide players naturally without "double-drawing" (no lighting up).
+  const items = [];
+  const obs = (game.level.obstacles || []);
+  for (const o of obs) items.push({ kind:'obs', z: o.y + o.h, obj: o });
+  if (P1) items.push({ kind:'p', z: P1.y + P1.h, obj: P1 });
+  if (P2) items.push({ kind:'p', z: P2.y + P2.h, obj: P2 });
+
+  items.sort((a,b)=>{
+    if (a.z !== b.z) return a.z - b.z;
+    // If bottoms tie, draw obstacles AFTER players so you can hide behind them even on the ground.
+    if (a.kind === 'obs' && b.kind === 'p') return 1;
+    if (a.kind === 'p' && b.kind === 'obs') return -1;
+    return 0;
+  });
+
+  for (const it of items){
+    if (it.kind === 'obs') drawObstacle(it.obj, 1);
+    else drawPlayer(it.obj);
+  }
+}
+
+function drawPlayer(p){
     if (!p) return;
 
     ctx.save();
+
+
+    const invis = (effectKind(p) === 'invis');
+    if (invis) ctx.globalAlpha = 0.18;
 
     // glow
     ctx.globalAlpha = 0.18;
@@ -1384,17 +1793,19 @@
     ctx.beginPath(); ctx.arc(eyeX,eyeY,3,0,Math.PI*2); ctx.fill();
 
     // IT border
-    if (p.isIt) {
+    if (p.isIt && !invis) {
       ctx.strokeStyle='rgba(255,215,80,.98)';
       ctx.lineWidth=4;
       ctx.strokeRect(p.x-3,p.y-3,p.w+6,p.h+6);
     }
 
     // label
-    ctx.font='900 12px system-ui';
+    if (!invis) {
+      ctx.font='900 12px system-ui';
     ctx.textAlign='center'; ctx.textBaseline='bottom';
     ctx.fillStyle='rgba(255,255,255,.95)';
     ctx.fillText(p.id, p.x+p.w/2, p.y-6);
+    }
 
     ctx.restore();
   }
@@ -1407,7 +1818,7 @@
       const k = effectKind(p);
       if (!k) return '—';
       const s = Math.ceil(Math.max(0, p.effect.until - nowMs())/1000);
-      const label = ({speed:'Speed',jump:'Jump',both:'Speed+Jump',invert:'Invert',slow:'Slowed'})[k] || k;
+      const label = ({speed:'Speed',jump:'Jump',both:'Speed+Jump',invert:'Invert',slow:'Slowed',invis:'Invisible'})[k] || k;
       return `${label} • ${s}s`;
     };
 
@@ -1459,8 +1870,30 @@
     tryStartTagQuestion();
   }
 
+function drawCountdown(){
+  if (game.state !== 'play') return;
+  const now = nowMs();
+  if (game.headstartUntil && now < game.headstartUntil) {
+    const n = Math.ceil((game.headstartUntil - now)/1000);
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    ctx.fillStyle = 'rgba(0,0,0,.28)';
+    roundedRect(W/2-62, 18, 124, 78, 18); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.95)';
+    ctx.font = '900 54px system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(n), W/2, 58);
+    ctx.restore();
+  }
+}
+
   function render(t){
     ctx.globalAlpha = 1;
+
+    const inHeadstart = (game.headstartUntil && nowMs() < game.headstartUntil);
+    if (timerPanelEl) timerPanelEl.style.visibility = inHeadstart ? 'hidden' : 'visible';
+    if (timerValEl && !inHeadstart) timerValEl.textContent = formatTime(nowMs() - game.startTimeMs);
 
     if (game.level.theme === 'park') drawParkBG(t);
     else if (game.level.theme === 'space') drawSpaceBG(t);
@@ -1469,9 +1902,9 @@
     drawPlatforms();
     drawLaunchPads();
     drawBuffs(t);
+    drawActors();
 
-    drawPlayer(P1);
-    drawPlayer(P2);
+    drawCountdown();
 
     drawHUD();
   }
@@ -1499,6 +1932,11 @@
     game.tagLatch = false;
     clearGlobal();
     resetPlayers(false);
+
+    game.startTimeMs = nowMs();
+    const it = P1.isIt ? P1 : P2;
+    game.headstartItId = it.id;
+    game.headstartUntil = nowMs() + 3000;
   }
 
   // ---------------- Boot ----------------
