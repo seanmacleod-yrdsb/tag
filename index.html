@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Math Tag: Park & Space</title>
+  <title>Math Tag: Park • Space • Inverted</title>
   <style>
     html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     body { background: #06130b; overflow: hidden; }
@@ -32,7 +32,7 @@
       border: 1px solid rgba(255,255,255,.10);
       border-radius: 14px;
       padding: 10px 12px;
-      max-width: 720px;
+      max-width: 760px;
       line-height: 1.25;
       backdrop-filter: blur(6px);
     }
@@ -48,9 +48,10 @@
       z-index: 20;
     }
 
+    /* Splash */
     #splash { display: flex; }
     #sCard {
-      width: min(960px, calc(100vw - 24px));
+      width: min(980px, calc(100vw - 24px));
       background: radial-gradient(1200px 420px at 20% -10%, rgba(120,255,190,.20), transparent 50%),
                   radial-gradient(900px 420px at 80% 0%, rgba(120,190,255,.18), transparent 55%),
                   rgba(10,14,12,.92);
@@ -64,7 +65,7 @@
     #brand { font-size: 22px; font-weight: 1000; display:flex; align-items:center; gap:10px; letter-spacing:.3px; }
     #badge { font-size: 12px; font-weight: 900; padding:5px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.08); }
 
-    .grid { display:grid; grid-template-columns: 1.1fr 1fr; gap:14px; }
+    .grid { display:grid; grid-template-columns: 1.05fr 1fr; gap:14px; }
     @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
 
     .box { border:1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.22); border-radius:18px; padding:14px; }
@@ -85,6 +86,7 @@
     .seg { display:inline-flex; gap:8px; flex-wrap:wrap; }
     .seg button.active { background: rgba(120,255,190,.16); border-color: rgba(120,255,190,.28); }
 
+    /* Custom color dropdowns */
     .dd { position: relative; display:inline-block; min-width: 220px; }
     .ddBtn { width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; }
     .ddLeft { display:flex; align-items:center; gap:10px; }
@@ -109,8 +111,9 @@
     }
     .ddItem:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.10); }
 
-    .levels { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
-    @media (max-width: 620px){ .levels{ grid-template-columns: 1fr; } }
+    .levels { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; }
+    @media (max-width: 900px){ .levels{ grid-template-columns: 1fr; } }
+
     .levelCard {
       cursor:pointer; user-select:none;
       border-radius:18px; padding:14px;
@@ -131,6 +134,8 @@
                         radial-gradient(circle at 70% 60%, rgba(120,190,255,.40), transparent 60%); }
     .spaceArt { background: radial-gradient(circle at 30% 30%, rgba(170,120,255,.60), transparent 55%),
                          radial-gradient(circle at 70% 60%, rgba(120,210,255,.40), transparent 60%); }
+    .invArt { background: radial-gradient(circle at 30% 30%, rgba(255,160,80,.55), transparent 55%),
+                      radial-gradient(circle at 70% 60%, rgba(255,80,150,.38), transparent 60%); }
 
     #startRow { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-top:14px; flex-wrap:wrap; }
     #startBtn {
@@ -140,10 +145,11 @@
       font-weight: 1000;
       box-shadow: 0 14px 40px rgba(0,0,0,.35);
     }
-    #hint { font-size: 12px; opacity: .85; font-weight: 800; }
+    #hint { font-size: 12px; opacity: .85; font-weight: 800; line-height: 1.2; }
 
     .hidden { display:none !important; }
 
+    /* Question modal */
     #qCard {
       width: min(580px, calc(100vw - 28px));
       background: rgba(10,14,12,.92);
@@ -162,7 +168,7 @@
       font-weight: 900;
     }
     .dot { width:10px; height:10px; border-radius:50%; }
-    #qPrompt { margin:12px 0 10px; font-size: 20px; font-weight: 1000; }
+    #qPrompt { margin:12px 0 10px; font-size: 22px; font-weight: 1000; }
     #qSub { opacity:.85; font-size: 13px; margin-bottom: 10px; }
     #qRow { display:flex; gap:10px; align-items:center; }
     #qAns {
@@ -175,7 +181,9 @@
       font-size: 16px;
       outline: none;
     }
+    #qBtn { padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.20); background: rgba(90,220,120,.18); }
 
+    /* Error overlay */
     #errOverlay { z-index: 30; }
     #errCard {
       width: min(760px, calc(100vw - 28px));
@@ -200,7 +208,7 @@
         Double jump always on.
       </div>
       <div style="margin-top:6px; opacity:.9;">
-        Tag by colliding → the <b>initiator</b> answers to pass “it”. Buffs also require questions.
+        Tag by colliding → the <b>tagger</b> answers to pass “it”. Buffs also require questions.
       </div>
     </div>
     <div class="panel" id="hudPanel">
@@ -217,8 +225,8 @@
   <div class="overlay" id="splash">
     <div id="sCard">
       <div id="brandRow">
-        <div id="brand">🏷️✨ Math Tag <span id="badge">2-Player • Single HTML</span></div>
-        <div style="opacity:.85; font-weight:1000; font-size:12px;">Park + Space</div>
+        <div id="brand">🏷️✨ Math Tag <span id="badge">Park • Space • Inverted</span></div>
+        <div style="opacity:.85; font-weight:1000; font-size:12px;">Single HTML</div>
       </div>
 
       <div class="grid">
@@ -261,17 +269,25 @@
             <div class="levelCard" id="lvlPark">
               <div class="levelArt parkArt"></div>
               <div class="levelTitle">🌿 Park</div>
-              <div class="levelSub">Bright sky • green platforms • normal gravity</div>
+              <div class="levelSub">Green platforms • normal gravity</div>
             </div>
             <div class="levelCard" id="lvlSpace">
               <div class="levelArt spaceArt"></div>
               <div class="levelTitle">🌙 Space</div>
-              <div class="levelSub">Starfield • neon platforms • floaty gravity</div>
+              <div class="levelSub">Starfield • floaty gravity</div>
+            </div>
+            <div class="levelCard" id="lvlInv">
+              <div class="levelArt invArt"></div>
+              <div class="levelTitle">🙃 Inverted</div>
+              <div class="levelSub">Walk on undersides • weird gravity</div>
             </div>
           </div>
 
           <div id="startRow">
-            <div id="hint">Launchpads in bottom corners = super jump. (No platforms above.)</div>
+            <div id="hint">
+              Launchpads = super jump. In Inverted, pads are near the <b>ceiling</b> too.<br>
+              New buff in Inverted: <b>Normalize</b> (10s).
+            </div>
             <button id="startBtn">Start Game</button>
           </div>
         </div>
@@ -301,9 +317,7 @@
   <div class="overlay" id="errOverlay">
     <div id="errCard">
       <div id="errTitle">⚠️ Something went wrong on this device</div>
-      <div style="opacity:.85; font-weight:800; margin-bottom:10px;">
-        Please copy this text to me — I’ll patch it fast.
-      </div>
+      <div style="opacity:.85; font-weight:800; margin-bottom:10px;">Please copy this text to me — I’ll patch it fast.</div>
       <div id="errText"></div>
     </div>
   </div>
@@ -318,27 +332,28 @@
 
   const hudEl = document.getElementById('hud');
   const helpPanel = document.getElementById('helpPanel');
-  const hudPanel  = document.getElementById('hudPanel');
+  const hudPanel = document.getElementById('hudPanel');
 
-  const splash   = document.getElementById('splash');
+  const splash = document.getElementById('splash');
   const startBtn = document.getElementById('startBtn');
-  const lvlPark  = document.getElementById('lvlPark');
+  const lvlPark = document.getElementById('lvlPark');
   const lvlSpace = document.getElementById('lvlSpace');
+  const lvlInv = document.getElementById('lvlInv');
 
   const gradeSeg = document.getElementById('gradeSeg');
   const typeSeg  = document.getElementById('typeSeg');
 
-  const qOverlay  = document.getElementById('qOverlay');
+  const qOverlay = document.getElementById('qOverlay');
   const qPromptEl = document.getElementById('qPrompt');
-  const qAnsEl    = document.getElementById('qAns');
-  const qBtn      = document.getElementById('qBtn');
-  const qMsgEl    = document.getElementById('qMsg');
-  const whoDot    = document.getElementById('whoDot');
-  const whoName   = document.getElementById('whoName');
+  const qAnsEl = document.getElementById('qAns');
+  const qBtn = document.getElementById('qBtn');
+  const qMsgEl = document.getElementById('qMsg');
+  const whoDot = document.getElementById('whoDot');
+  const whoName = document.getElementById('whoName');
   const qReasonEl = document.getElementById('qReason');
 
   const errOverlay = document.getElementById('errOverlay');
-  const errTextEl  = document.getElementById('errText');
+  const errTextEl = document.getElementById('errText');
 
   // ---------------- Constants ----------------
   const BASE_W = 1100, BASE_H = 650;
@@ -354,6 +369,7 @@
     { name: "Pink",   hex: "#ff6ad5" },
     { name: "Cyan",   hex: "#49fff2" },
   ];
+
   const GRADES = ["Grade 4", "Grade 5", "Grade 6"];
   const QTYPES = ["Numbers", "Geometry", "Operations"];
 
@@ -378,9 +394,10 @@
     errTextEl.textContent = String(err && err.stack ? err.stack : err);
   }
 
+  // HiDPI
   function applyHiDPI(){
     const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
-    canvas.width  = Math.floor(BASE_W * dpr);
+    canvas.width = Math.floor(BASE_W * dpr);
     canvas.height = Math.floor(BASE_H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
@@ -396,7 +413,7 @@
   }, { passive:false });
   window.addEventListener('keyup', (e) => keys.delete(e.key));
 
-  // ---------------- UI widgets ----------------
+  // ---------------- Custom UI bits ----------------
   function buildSeg(container, items, onPick, defaultIndex=0) {
     container.innerHTML = "";
     items.forEach((label, idx) => {
@@ -455,6 +472,7 @@
       sw.style.background = item.hex;
       txt.textContent = item.name;
     }
+
     function closeMenu(){ menu.style.display = 'none'; }
     function toggleMenu(){ menu.style.display = (menu.style.display === 'block') ? 'none' : 'block'; }
 
@@ -488,8 +506,8 @@
     const groundH = 48;
     const ground = { x: 0, y: H-groundH, w: W, h: groundH, kind:'ground' };
     const pads = [
-      { x: 14, y: H-groundH-14, w: 80, h: 14 },
-      { x: W-14-80, y: H-groundH-14, w: 80, h: 14 },
+      { x: 14, y: H-groundH-14, w: 80, h: 14, dir: 'up' },
+      { x: W-14-80, y: H-groundH-14, w: 80, h: 14, dir: 'up' },
     ];
     const platforms = [
       ground,
@@ -509,6 +527,7 @@
       maxFall: 950,
       baseJump: 520,
       baseSpeed: 250,
+      horizInvert: false,
       groundH,
       pads,
       platforms,
@@ -523,10 +542,9 @@
     const groundH = 44;
     const ground = { x: 0, y: H-groundH, w: W, h: groundH, kind:'ground' };
     const pads = [
-      { x: 14, y: H-groundH-14, w: 80, h: 14 },
-      { x: W-14-80, y: H-groundH-14, w: 80, h: 14 },
+      { x: 14, y: H-groundH-14, w: 80, h: 14, dir:'up' },
+      { x: W-14-80, y: H-groundH-14, w: 80, h: 14, dir:'up' },
     ];
-    // VERY different layout from Park
     const platforms = [
       ground,
       { x: (W/2)-320, y: H-190, w: 260, h: 18 },
@@ -547,12 +565,65 @@
       maxFall: 620,
       baseJump: 480,
       baseSpeed: 240,
+      horizInvert: false,
       groundH,
       pads,
       platforms,
       buffIcons: {
         speed: '🚀', jump: '🌙', both: '✨',
         swapIt: '👽', invert: '🌀', teleport: '🛸', slowEnemy: '🧊'
+      }
+    };
+  }
+
+  function makeLevelInverted(){
+    // Inverted world: gravity pulls upward. Players “stick” to undersides.
+    const topH = 20;
+    const bottomH = 48;
+
+    const ceiling = { x: 0, y: 0, w: W, h: topH, kind:'ceiling' };
+    const floor   = { x: 0, y: H-bottomH, w: W, h: bottomH, kind:'ground' };
+
+    // Put most platforms near the top so you can hang underneath them.
+    const platforms = [
+      ceiling,
+      floor,
+      { x: 130, y: 90,  w: 260, h: 18 },
+      { x: W-130-260, y: 90, w: 260, h: 18 },
+      { x: (W/2)-220, y: 165, w: 440, h: 20 },
+      { x: 220, y: 255, w: 200, h: 16 },
+      { x: W-220-200, y: 255, w: 200, h: 16 },
+      { x: (W/2)-140, y: 330, w: 280, h: 16 },
+      { x: (W/2)-380, y: 420, w: 180, h: 14 },
+      { x: (W/2)+200, y: 420, w: 180, h: 14 },
+    ];
+
+    // Launchpads: provide top pads (push “down”), and also bottom pads for when Normalize is active.
+    const pads = [
+      // top pads (for inverted play)
+      { x: 14, y: topH+8, w: 80, h: 14, dir:'down' },
+      { x: W-14-80, y: topH+8, w: 80, h: 14, dir:'down' },
+      // bottom pads (for temporary normalized play)
+      { x: 14, y: H-bottomH-14, w: 80, h: 14, dir:'up' },
+      { x: W-14-80, y: H-bottomH-14, w: 80, h: 14, dir:'up' },
+    ];
+
+    return {
+      name: "Inverted",
+      theme: "inverted",
+      gravity: -1200,          // upward pull
+      maxFall: 900,            // speed cap (magnitude)
+      baseJump: 520,           // jump magnitude; direction determined by gravity sign
+      baseSpeed: 245,
+      horizInvert: true,       // left/right reversed in this level
+      groundH: bottomH,
+      topH,
+      pads,
+      platforms,
+      buffIcons: {
+        speed:'⚡', jump:'🦇', both:'✨',
+        swapIt:'👑', invert:'🔁', teleport:'🌀', slowEnemy:'🧊',
+        normalize:'🧭'
       }
     };
   }
@@ -565,23 +636,39 @@
     buffsOnMap: [],
     buffSpawnTimer: 0,
     lastOverlap: false,
-    lastT: nowMs()
+    lastT: nowMs(),
+    globalEffect: { kind:null, until:0 }, // e.g., normalizeWorld (Inverted only)
+    tagLatch: false
   };
+
+  function globalActive(kind){
+    return game.globalEffect.kind === kind && nowMs() < game.globalEffect.until;
+  }
+  function setGlobal(kind, ms){
+    game.globalEffect.kind = kind;
+    game.globalEffect.until = nowMs() + ms;
+  }
+  function clearGlobal(){
+    game.globalEffect.kind = null;
+    game.globalEffect.until = 0;
+  }
 
   // ---------------- Splash wiring ----------------
   let pickedGrade = "Grade 5";
-  let pickedType  = "Numbers";
+  let pickedType = "Numbers";
   buildSeg(gradeSeg, GRADES, (x)=>pickedGrade=x, 1);
-  buildSeg(typeSeg,  QTYPES, (x)=>pickedType=x, 0);
+  buildSeg(typeSeg, QTYPES, (x)=>pickedType=x, 0);
 
   let selectedLevel = "Park";
   function setLevelChoice(name){
     selectedLevel = name;
     lvlPark.classList.toggle('active', name === "Park");
     lvlSpace.classList.toggle('active', name === "Space");
+    lvlInv.classList.toggle('active', name === "Inverted");
   }
   lvlPark.addEventListener('click', ()=>setLevelChoice("Park"));
   lvlSpace.addEventListener('click', ()=>setLevelChoice("Space"));
+  lvlInv.addEventListener('click', ()=>setLevelChoice("Inverted"));
   setLevelChoice("Park");
 
   const p1DD = makeColorDropdown(document.getElementById('p1DD'), "Blue");
@@ -599,8 +686,10 @@
 
   startBtn.addEventListener('click', () => {
     game.config = { p1Color: p1DD.value, p2Color: p2DD.value, grade: pickedGrade, qtype: pickedType };
-    game.level = (selectedLevel === "Space") ? makeLevelSpace() : makeLevelPark();
-    // IMPORTANT: also update any "preview" state if we ever draw on splash
+    if (selectedLevel === "Space") game.level = makeLevelSpace();
+    else if (selectedLevel === "Inverted") game.level = makeLevelInverted();
+    else game.level = makeLevelPark();
+
     resetPlayers(true);
     startGame();
   });
@@ -626,20 +715,26 @@
 
   let P1 = null, P2 = null;
 
-  // initOnly=true means "make sure P1/P2 exist even on splash"
   function resetPlayers(initOnly=false){
     const c1 = game.config.p1Color || "#39a9ff";
     const c2 = game.config.p2Color || "#ff4b4b";
 
-    P1 = makePlayer('P1', c1, 220, H-260, { left:'a', right:'d', jump:'w' });
-    P2 = makePlayer('P2', c2, W-260, H-260, { left:'ArrowLeft', right:'ArrowRight', jump:'ArrowUp' });
+    // Spawn positions depend on level:
+    if (game.level.theme === 'inverted') {
+      // start near top so they can “stick” quickly
+      P1 = makePlayer('P1', c1, 220, 240, { left:'a', right:'d', jump:'w' });
+      P2 = makePlayer('P2', c2, W-260, 240, { left:'ArrowLeft', right:'ArrowRight', jump:'ArrowUp' });
+    } else {
+      P1 = makePlayer('P1', c1, 220, H-260, { left:'a', right:'d', jump:'w' });
+      P2 = makePlayer('P2', c2, W-260, H-260, { left:'ArrowLeft', right:'ArrowRight', jump:'ArrowUp' });
+    }
 
-    // only randomize "it" when starting actual play
     if (!initOnly) (Math.random() < 0.5 ? P1 : P2).isIt = true;
   }
 
-  // ---------------- Physics ----------------
-  function resolveAABB(m, s){
+  // ---------------- Physics helpers ----------------
+  function resolveAABB(m, s, gravitySign){
+    // gravitySign: +1 for normal (down), -1 for inverted (up)
     const dx1 = (s.x + s.w) - m.x;
     const dx2 = (m.x + m.w) - s.x;
     const dy1 = (s.y + s.h) - m.y;
@@ -652,14 +747,29 @@
       else m.x = s.x - m.w;
       m.vx = 0;
     } else {
+      // Vertical resolution
       if (dy1 < dy2) {
+        // push DOWN: m.y = s.y + s.h
         m.y = s.y + s.h;
-        if (m.vy < 0) m.vy = 0;
+        // If gravity pulls UP, landing is on underside (ceiling-walk)
+        if (gravitySign < 0 && m.vy < 0) {
+          m.vy = 0;
+          m.onGround = true;
+          m.jumpsLeft = 2;
+        } else {
+          if (m.vy < 0) m.vy = 0;
+        }
       } else {
+        // push UP: m.y = s.y - m.h
         m.y = s.y - m.h;
-        m.vy = 0;
-        m.onGround = true;
-        m.jumpsLeft = 2;
+        // If gravity pulls DOWN, this is normal landing
+        if (gravitySign > 0 && m.vy > 0) {
+          m.vy = 0;
+          m.onGround = true;
+          m.jumpsLeft = 2;
+        } else {
+          if (m.vy > 0) m.vy = 0;
+        }
       }
     }
   }
@@ -669,20 +779,44 @@
   function clearEffect(p){ if (!p) return; p.effect.kind=null; p.effect.until=0; }
   function setEffect(p, kind, ms){ if (!p) return; p.effect.kind=kind; p.effect.until=nowMs()+ms; }
 
+  function worldIsNormalized(){
+    // Only meaningful in inverted level
+    return game.level.theme === 'inverted' && globalActive('normalizeWorld');
+  }
+
+  function gravityValue(){
+    if (worldIsNormalized()) return 1400;
+    return game.level.gravity;
+  }
+  function gravitySign(){
+    return Math.sign(gravityValue() || 1);
+  }
+  function baseSpeed(){
+    return worldIsNormalized() ? 250 : game.level.baseSpeed;
+  }
+  function baseJump(){
+    return worldIsNormalized() ? 520 : game.level.baseJump;
+  }
+  function horizInvertedByLevel(){
+    return (!worldIsNormalized() && !!game.level.horizInvert);
+  }
+
   function speedFor(p){
-    let s = game.level.baseSpeed;
+    let s = baseSpeed();
     const k = effectKind(p);
     if (k === 'speed' || k === 'both') s *= 1.65;
     if (k === 'slow') s *= 0.60;
     return s;
   }
   function jumpFor(p){
-    let j = game.level.baseJump;
+    let j = baseJump();
     const k = effectKind(p);
     if (k === 'jump' || k === 'both') j *= 1.25;
     return j;
   }
-  function inverted(p){ return effectKind(p) === 'invert'; }
+  function invertedControlsDebuff(p){
+    return effectKind(p) === 'invert';
+  }
 
   function updatePlayer(p, dt){
     if (!p) return;
@@ -691,7 +825,9 @@
     p.tagCooldown = Math.max(0, p.tagCooldown - dt);
     p._launchCD = Math.max(0, p._launchCD - dt);
 
-    const inv = inverted(p) ? -1 : 1;
+    const invDebuff = invertedControlsDebuff(p) ? -1 : 1;
+    const invLevel = horizInvertedByLevel() ? -1 : 1;
+
     const left = keys.has(p.controls.left);
     const right = keys.has(p.controls.right);
     const jump = keys.has(p.controls.jump);
@@ -699,50 +835,68 @@
     let move = 0;
     if (left) move -= 1;
     if (right) move += 1;
-    move *= inv;
+    move *= invDebuff * invLevel;
 
     const targetVx = move * speedFor(p);
     const accel = 2200;
     p.vx += clamp(targetVx - p.vx, -accel*(dt/1000), accel*(dt/1000));
     if (move !== 0) p.facing = Math.sign(move);
 
+    // Jump direction depends on gravity:
+    // gravitySign > 0 (normal): jump sets vy negative (up)
+    // gravitySign < 0 (inverted): jump sets vy positive (down)
+    const gSign = gravitySign();
     if (!p._jumpHeld && jump) {
       if (p.jumpsLeft > 0) {
-        p.vy = -jumpFor(p);
+        p.vy = (-gSign) * jumpFor(p);
         p.jumpsLeft -= 1;
       }
     }
     p._jumpHeld = jump;
 
-    p.vy += game.level.gravity * (dt/1000);
-    p.vy = Math.min(p.vy, game.level.maxFall);
+    // gravity
+    const gVal = gravityValue();
+    p.vy += gVal * (dt/1000);
 
+    // cap fall speed by magnitude + direction
+    const maxV = (worldIsNormalized() && game.level.theme === 'inverted') ? 950 : game.level.maxFall;
+    if (gVal > 0) p.vy = Math.min(p.vy, maxV);
+    else p.vy = Math.max(p.vy, -maxV);
+
+    // integrate
     p.x += p.vx * (dt/1000);
     p.y += p.vy * (dt/1000);
 
+    // bounds
     p.x = clamp(p.x, 0, W - p.w);
 
+    // collide platforms
+    const gravS = gSign;
     for (const plat of game.level.platforms) {
-      if (aabb(p, plat)) resolveAABB(p, plat);
+      if (aabb(p, plat)) resolveAABB(p, plat, gravS);
     }
 
-    const gy = H - game.level.groundH - p.h;
-    if (p.y > gy) {
-      p.y = gy; p.vy = 0; p.onGround = true; p.jumpsLeft = 2;
-    }
+    // safety clamps (keep in map)
+    if (p.y < -20) { p.y = -20; p.vy = 0; }
+    if (p.y > H - p.h + 20) { p.y = H - p.h + 20; p.vy = 0; }
 
+    // launch pads
     for (const lp of game.level.pads) {
       if (aabb(p, lp) && p._launchCD <= 0) {
-        p.vy = (game.level.theme === 'space') ? -740 : -820;
+        // dir: up => strong negative vy; down => strong positive vy
+        const strength = (game.level.theme === 'space') ? 740 : 820;
+        p.vy = (lp.dir === 'up') ? -strength : +strength;
         p._launchCD = 700;
       }
     }
 
+    // expire local effect
     if (p.effect.kind && nowMs() >= p.effect.until) clearEffect(p);
   }
 
-  // ---------------- Questions ----------------
+  // ---------------- Questions (simplified & quick) ----------------
   let pendingQuestion = null;
+
   function normalizeAnswer(s){ return (s ?? '').toString().trim().replace(/\s+/g,''); }
   function parseMaybeNumberOrFraction(s){
     s = normalizeAnswer(s);
@@ -758,55 +912,45 @@
   }
 
   function gradeParams(g){
-    if (g === "Grade 4") return { mulMax: 12, addMax: 600, subMax: 700, divMax: 12, decPlaces: 1 };
-    if (g === "Grade 6") return { mulMax: 20, addMax: 1400, subMax: 1500, divMax: 18, decPlaces: 2 };
-    return { mulMax: 15, addMax: 900, subMax: 999, divMax: 14, decPlaces: 1 };
+    // Keep it quick: small numbers, but slightly more range by grade.
+    if (g === "Grade 4") return { addMax: 40, subMax: 60, mulMax: 8, divMax: 8 };
+    if (g === "Grade 6") return { addMax: 120, subMax: 140, mulMax: 10, divMax: 10 };
+    return { addMax: 80, subMax: 100, mulMax: 9, divMax: 9 };
   }
 
   function makeQuestion(grade, type){
     const gp = gradeParams(grade);
     const simple = (text, ans)=>({ text, check:(s)=>parseMaybeNumberOrFraction(s) === ans });
-
     const Q = [];
+
     if (type === "Numbers") {
-      Q.push(()=>{ const a=randi(100,gp.addMax), b=randi(50,gp.addMax-50); return simple(`What is ${a} + ${b}?`, a+b); });
-      Q.push(()=>{ const a=randi(200,gp.subMax), b=randi(20, Math.min(250,a-1)); return simple(`What is ${a} − ${b}?`, a-b); });
-      Q.push(()=>{
-        const places = gp.decPlaces;
-        const scale = Math.pow(10, places);
-        const a = randi(12,99)/scale*(places===2?1:10);
-        const b = randi(12,99)/scale*(places===2?1:10);
-        const ans = Math.round((a+b)*100)/100;
-        return { text:`What is ${a.toFixed(places)} + ${b.toFixed(places)}?`, check:(s)=>{
-          const n = parseMaybeNumberOrFraction(s);
-          return n !== null && Math.abs(n-ans) < 1e-9;
-        }};
-      });
-      Q.push(()=>{
-        const m=[3,4,5,6,7,8,9,10,12][randi(0,9)];
-        const k=randi(2,12);
-        const n=m*k;
-        return simple(`What is the next multiple of ${m} after ${n}?`, n+m);
-      });
+      Q.push(()=>{ const a=randi(2,gp.addMax), b=randi(2,gp.addMax); return simple(`${a} + ${b} = ?`, a+b); });
+      Q.push(()=>{ const a=randi(10,gp.subMax), b=randi(2, Math.min(30,a-1)); return simple(`${a} − ${b} = ?`, a-b); });
+      Q.push(()=>{ const a=randi(2,30), b=randi(2,30); return simple(`${a} + ${b} − 10 = ?`, a+b-10); });
+      Q.push(()=>{ const a=randi(10,99); return simple(`What is ${a} rounded to the nearest 10?`, Math.round(a/10)*10); });
     }
+
     if (type === "Geometry") {
-      Q.push(()=>{ const w=randi(4,grade==="Grade 6"?28:20), h=randi(3,grade==="Grade 6"?22:16); return simple(`A rectangle is ${w} by ${h}. Area?`, w*h); });
-      Q.push(()=>{ const w=randi(5,grade==="Grade 6"?30:22), h=randi(4,grade==="Grade 6"?24:18); return simple(`A rectangle is ${w} cm by ${h} cm. Perimeter (cm)?`, 2*(w+h)); });
-      Q.push(()=>{ const a=randi(20,160); return simple(`Angles on a straight line add to 180°. If one is ${a}°, the other is?`, 180-a); });
-      Q.push(()=>{ const a=randi(20,100), b=randi(20,100); return simple(`Triangle angles: ${a}° and ${b}°. Third angle?`, 180-a-b); });
+      Q.push(()=>{ const w=randi(2,12), h=randi(2,12); return simple(`Area of ${w}×${h}?`, w*h); });
+      Q.push(()=>{ const w=randi(3,15), h=randi(3,15); return simple(`Perimeter of ${w}×${h}?`, 2*(w+h)); });
+      Q.push(()=>{ const a=randi(20,160); return simple(`Straight line: 180 − ${a} = ?`, 180-a); });
+      Q.push(()=>{ const a=randi(30,100), b=randi(30,100); return simple(`Triangle: 180 − (${a}+${b}) = ?`, 180-(a+b)); });
     }
+
     if (type === "Operations") {
-      Q.push(()=>{ const a=randi(2,gp.mulMax), b=randi(2,gp.mulMax); return simple(`What is ${a} × ${b}?`, a*b); });
-      Q.push(()=>{ const b=randi(3,gp.divMax), ans=randi(4,grade==="Grade 6"?22:18); return simple(`What is ${b*ans} ÷ ${b}?`, ans); });
-      Q.push(()=>{ const a=randi(2,gp.mulMax), b=randi(2,gp.mulMax), c=randi(5,grade==="Grade 6"?60:35); return simple(`What is ${a} × ${b} + ${c}?`, a*b+c); });
-      Q.push(()=>{ const den=[4,5,6,8,10,12][randi(0,grade==="Grade 6"?6:4)], a=randi(1,den-1), b=randi(1,den-1); const exact=(a+b)/den;
-        return { text:`What is ${a}/${den} + ${b}/${den}? (fraction or decimal)`, check:(s)=>{
-          const n=parseMaybeNumberOrFraction(s);
-          return n!==null && Math.abs(n-exact) < 1e-9;
-        }};
+      // Brackets-based, short, and small multiplication/division (<=10x10, <=100)
+      Q.push(()=>{ const a=randi(1,12), b=randi(1,12), c=randi(1,12); return simple(`(${a} + ${b}) − ${c} = ?`, (a+b)-c); });
+      Q.push(()=>{ const a=randi(1,12), b=randi(1,12), c=randi(1,12); return simple(`${a} + (${b} − ${c}) = ?`, a+(b-c)); });
+      Q.push(()=>{ const a=randi(2,gp.mulMax), b=randi(2,gp.mulMax), c=randi(1,15); return simple(`(${a} × ${b}) + ${c} = ?`, (a*b)+c); });
+      Q.push(()=> {
+        const d=randi(2,gp.divMax);
+        const ans=randi(2,10);
+        const n=d*ans; // <= 100 guaranteed because d<=10, ans<=10
+        return simple(`${n} ÷ ${d} = ?`, ans);
       });
     }
-    return (Q.length ? Q[randi(0,Q.length)]() : simple("What is 9 + 7?",16));
+
+    return (Q.length ? Q[randi(0,Q.length)]() : simple("9 + 7 = ?", 16));
   }
 
   function showQuestion({ who, reason, q }){
@@ -851,7 +995,7 @@
   });
 
   // ---------------- Buffs ----------------
-  const BUFFS = [
+  const BUFFS_BASE = [
     { key:'speed',     label:'Superspeed (10s)',      rarity:1.00, duration:10000, kind:'speed',  positive:true },
     { key:'jump',      label:'Higher Jumps (10s)',    rarity:1.00, duration:10000, kind:'jump',   positive:true },
     { key:'both',      label:'Jump + Speed (10s)',    rarity:0.45, duration:10000, kind:'both',   positive:true },
@@ -860,42 +1004,59 @@
     { key:'teleport',  label:'Teleporter',           rarity:0.70, duration:0,     kind:null,     positive:true },
     { key:'slowEnemy', label:'Slow Enemy (10s)',      rarity:0.65, duration:10000, kind:'slow',   positive:true, appliesToEnemy:true }
   ];
+
+  const BUFF_INVERTED_EXTRA = [
+    { key:'normalize', label:'Normalize (10s)', rarity:0.45, duration:10000, kind:null, positive:true, global:true }
+  ];
+
+  function buffsForLevel(){
+    if (game.level.theme === 'inverted') return BUFFS_BASE.concat(BUFF_INVERTED_EXTRA);
+    return BUFFS_BASE;
+  }
+
   function weightedPick(items){
     const total = items.reduce((s,it)=>s+it.rarity,0);
     let r = Math.random()*total;
     for (const it of items) { r -= it.rarity; if (r<=0) return it; }
     return items[items.length-1];
   }
+
   function randomSafeSpot(w,h){
     for (let i=0;i<60;i++){
       const x = rand(120, W-120-w);
       const y = rand(60, H-140-h);
       const test = { x,y,w,h };
-      if (x < 120 || x+w > W-120) continue;
-      let ok=true;
+      let ok = true;
       for (const p of game.level.platforms) if (aabb(test,p)) { ok=false; break; }
       if (ok) return { x,y };
     }
-    return { x:(W/2)-w/2, y:80 };
+    return { x: (W/2)-w/2, y: 80 };
   }
+
   function spawnBuff(){
-    const b = weightedPick(BUFFS);
+    const all = buffsForLevel();
+    const b = weightedPick(all);
+
     for (let tries=0; tries<30; tries++){
       const x = rand(140, W-140);
-      const y = rand(80, H-240);
+      const y = rand(60, H-240);
       const rect = { x,y,w:26,h:26 };
       if (P1 && aabb(rect,P1)) continue;
       if (P2 && aabb(rect,P2)) continue;
+
       let bad=false;
       for (const p of game.level.platforms) if (aabb(rect,p)) { bad=true; break; }
       if (bad) continue;
+
       game.buffsOnMap.push({ type:b.key, label:b.label, x,y,w:26,h:26, bob:Math.random()*10 });
       return;
     }
   }
+
   function applyBuffResult(collector, key, correct){
     const enemy = (collector===P1)?P2:P1;
-    const buff = BUFFS.find(x=>x.key===key);
+    const all = buffsForLevel();
+    const buff = all.find(x=>x.key===key);
     if (!buff) return;
 
     const overrideCollector = ()=>clearEffect(collector);
@@ -904,38 +1065,50 @@
     if (buff.positive) {
       if (!correct) return;
 
+      // normalize (global, inverted level)
+      if (key === 'normalize') {
+        if (game.level.theme === 'inverted') setGlobal('normalizeWorld', buff.duration);
+        return;
+      }
+
       if (key === 'teleport') {
         overrideCollector();
         const spot = randomSafeSpot(collector.w, collector.h);
         collector.x = spot.x; collector.y = spot.y; collector.vx=0; collector.vy=0;
         return;
       }
+
       if (key === 'swapIt') {
         overrideCollector();
         collector.isIt = false;
         enemy.isIt = true;
         return;
       }
+
       if (key === 'slowEnemy') {
         overrideEnemy();
         setEffect(enemy, 'slow', buff.duration);
         return;
       }
+
       overrideCollector();
       setEffect(collector, buff.kind, buff.duration);
       return;
     }
 
+    // harmful: invert controls
     if (buff.harmful && key === 'invert') {
       if (correct) { overrideEnemy(); setEffect(enemy,'invert',buff.duration); }
       else { overrideCollector(); setEffect(collector,'invert',buff.duration); }
     }
   }
+
   function tryCollectBuff(p){
     if (!p) return;
     for (let i=0;i<game.buffsOnMap.length;i++){
       const b = game.buffsOnMap[i];
       if (!aabb(p,b)) continue;
+
       game.buffsOnMap.splice(i,1);
 
       const q = makeQuestion(game.config.grade, game.config.qtype);
@@ -943,36 +1116,50 @@
       showQuestion({
         who: p,
         reason: `${icon} ${b.label}`,
-        q: { text:q.text, check:q.check, onResolve:(ok)=>applyBuffResult(p,b.type,ok) }
+        q: {
+          text: q.text,
+          check: q.check,
+          onResolve: (ok)=>applyBuffResult(p, b.type, ok)
+        }
       });
       return;
     }
   }
 
-  // ---------------- Tag ----------------
-  function initiatorOfCollision(A,B){
-    const acx=A.x+A.w/2, acy=A.y+A.h/2;
-    const bcx=B.x+B.w/2, bcy=B.y+B.h/2;
-    const sx=bcx-acx, sy=bcy-acy;
-    const rvx=A.vx-B.vx, rvy=A.vy-B.vy;
-    const dot=rvx*sx + rvy*sy;
-    if (dot>0) return A;
-    if (dot<0) return B;
-    const as=A.vx*A.vx + A.vy*A.vy;
-    const bs=B.vx*B.vx + B.vy*B.vy;
-    return as>=bs ? A : B;
-  }
-  function tryStartTagQuestion(initiator, other){
-    const itPlayer = (P1 && P1.isIt) ? P1 : P2;
-    if (!initiator || !other || initiator !== itPlayer) return;
-    if (initiator.tagCooldown > 0) return;
+  // ---------------- Tagging (reliable) ----------------
+  function tryStartTagQuestion(){
+    if (game.state !== 'play') return;
+    if (!P1 || !P2) return;
 
-    initiator.tagCooldown = 700;
+    const overlap = aabb(P1, P2);
+    if (!overlap) {
+      game.tagLatch = false;
+      return;
+    }
+
+    // Only trigger once per “contact session”
+    if (game.tagLatch) return;
+
+    const tagger = P1.isIt ? P1 : P2;
+    const other  = (tagger === P1) ? P2 : P1;
+
+    if (tagger.tagCooldown > 0) {
+      game.tagLatch = true;
+      return;
+    }
+
+    tagger.tagCooldown = 550;
+    game.tagLatch = true;
+
     const q = makeQuestion(game.config.grade, game.config.qtype);
     showQuestion({
-      who: initiator,
+      who: tagger,
       reason: 'Tag attempt',
-      q: { text:q.text, check:q.check, onResolve:(ok)=>{ if (ok){ initiator.isIt=false; other.isIt=true; } } }
+      q: {
+        text: q.text,
+        check: q.check,
+        onResolve: (ok)=>{ if (ok) { tagger.isIt=false; other.isIt=true; } }
+      }
     });
   }
 
@@ -1008,7 +1195,7 @@
 
     ctx.save();
     ctx.globalAlpha = 0.10;
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#ffffff';
     ctx.font = '900 90px system-ui';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -1051,7 +1238,7 @@
 
     ctx.save();
     ctx.globalAlpha = 0.12;
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#ffffff';
     ctx.font = '900 90px system-ui';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -1059,20 +1246,64 @@
     ctx.restore();
   }
 
+  function drawInvertedBG(t){
+    // Warm “upside-down cavern / sunset” vibe
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#1a0c1e');
+    g.addColorStop(0.55,'#3b1330');
+    g.addColorStop(1,'#0f0a12');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    // floating embers
+    for (let i=0;i<120;i++){
+      const x=(i*91 + (t/6))%W;
+      const y=(i*57 + (t/14))%H;
+      ctx.globalAlpha = 0.05 + 0.12*Math.abs(Math.sin(t/900 + i));
+      ctx.fillStyle = 'rgba(255,190,120,1)';
+      ctx.fillRect(x, y, 2, 2);
+    }
+    ctx.globalAlpha=1;
+
+    // ceiling strip
+    ctx.fillStyle='rgba(255,255,255,.06)';
+    ctx.fillRect(0,0,W,20);
+
+    // watermark
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 80px system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(worldIsNormalized() ? 'INVERTED (NORMALIZED)' : 'INVERTED', W/2, 120);
+    ctx.restore();
+  }
+
   function drawPlatforms(){
     for (const p of game.level.platforms) {
-      if (p.kind === 'ground') continue;
+      if (p.kind === 'ground' || p.kind === 'ceiling') continue;
+
       if (game.level.theme === 'park') {
         ctx.fillStyle='rgba(35,160,80,.95)';
         roundedRect(p.x,p.y,p.w,p.h,10); ctx.fill();
         ctx.fillStyle='rgba(255,255,255,.12)';
         roundedRect(p.x,p.y,p.w,Math.max(6,p.h*0.35),10); ctx.fill();
-      } else {
+      } else if (game.level.theme === 'space') {
         ctx.fillStyle='rgba(100,100,170,.38)';
         roundedRect(p.x,p.y,p.w,p.h,10); ctx.fill();
         ctx.fillStyle='rgba(255,255,255,.10)';
         roundedRect(p.x,p.y,p.w,Math.max(6,p.h*0.35),10); ctx.fill();
         ctx.strokeStyle='rgba(170,120,255,.30)';
+        ctx.lineWidth=2;
+        ctx.strokeRect(p.x+1,p.y+1,p.w-2,p.h-2);
+        ctx.lineWidth=1;
+      } else {
+        // inverted
+        ctx.fillStyle='rgba(255,170,90,.24)';
+        roundedRect(p.x,p.y,p.w,p.h,10); ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,.10)';
+        roundedRect(p.x,p.y,p.w,Math.max(6,p.h*0.35),10); ctx.fill();
+        ctx.strokeStyle='rgba(255,120,190,.22)';
         ctx.lineWidth=2;
         ctx.strokeRect(p.x+1,p.y+1,p.w-2,p.h-2);
         ctx.lineWidth=1;
@@ -1090,7 +1321,7 @@
       ctx.fillStyle='rgba(255,255,255,.92)';
       ctx.font='16px system-ui';
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('⇧', lp.x+lp.w/2, lp.y+lp.h/2+1);
+      ctx.fillText(lp.dir === 'up' ? '⇧' : '⇩', lp.x+lp.w/2, lp.y+lp.h/2+1);
       ctx.restore();
     }
   }
@@ -1100,6 +1331,7 @@
     ctx.font='18px system-ui';
     ctx.textAlign='center';
     ctx.textBaseline='middle';
+
     for (const b of game.buffsOnMap) {
       b.bob += 0.06;
       const bobY = Math.sin(b.bob + t/500) * 4;
@@ -1124,9 +1356,11 @@
   }
 
   function drawPlayer(p){
-    if (!p) return; // safety guard
+    if (!p) return;
+
     ctx.save();
 
+    // glow
     ctx.globalAlpha = 0.18;
     ctx.fillStyle = '#fff';
     ctx.beginPath();
@@ -1134,24 +1368,29 @@
     ctx.fill();
     ctx.globalAlpha = 1;
 
+    // body
     ctx.fillStyle = p.color;
     roundedRect(p.x,p.y,p.w,p.h,10); ctx.fill();
 
+    // outline
     ctx.strokeStyle='rgba(0,0,0,.65)';
     ctx.lineWidth=3;
     ctx.strokeRect(p.x+0.5,p.y+0.5,p.w-1,p.h-1);
 
+    // eye
     ctx.fillStyle='rgba(255,255,255,.92)';
     const eyeX = p.x + (p.facing>0 ? 22 : 12);
     const eyeY = p.y + 16;
     ctx.beginPath(); ctx.arc(eyeX,eyeY,3,0,Math.PI*2); ctx.fill();
 
+    // IT border
     if (p.isIt) {
       ctx.strokeStyle='rgba(255,215,80,.98)';
       ctx.lineWidth=4;
       ctx.strokeRect(p.x-3,p.y-3,p.w+6,p.h+6);
     }
 
+    // label
     ctx.font='900 12px system-ui';
     ctx.textAlign='center'; ctx.textBaseline='bottom';
     ctx.fillStyle='rgba(255,255,255,.95)';
@@ -1162,6 +1401,7 @@
 
   function drawHUD(){
     if (!P1 || !P2) { hudEl.textContent = ''; return; }
+
     const it = P1.isIt ? P1 : P2;
     const lineFor = (p)=>{
       const k = effectKind(p);
@@ -1170,10 +1410,22 @@
       const label = ({speed:'Speed',jump:'Jump',both:'Speed+Jump',invert:'Invert',slow:'Slowed'})[k] || k;
       return `${label} • ${s}s`;
     };
+
+    let globalLine = '';
+    if (game.level.theme === 'inverted') {
+      if (globalActive('normalizeWorld')) {
+        const s = Math.ceil(Math.max(0, game.globalEffect.until - nowMs())/1000);
+        globalLine = `🧭 Normalize active • ${s}s`;
+      } else {
+        globalLine = `🙃 Inverted rules active`;
+      }
+    }
+
     hudEl.innerHTML = `
-      <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px; flex-wrap:wrap;">
         <span class="pill"><span class="dot" style="background:${it.color};"></span> IT: ${it.id}</span>
-        <span style="opacity:.90; font-weight:1000;">${game.level.name} • ${game.config.grade} • ${game.config.qtype}</span>
+        <span style="opacity:.92; font-weight:1000;">${game.level.name} • ${game.config.grade} • ${game.config.qtype}</span>
+        ${globalLine ? `<span style="opacity:.9; font-weight:1000;">${globalLine}</span>` : ``}
       </div>
       <div style="display:grid; gap:6px;">
         <div><b style="color:${P1.color};">P1</b> — ${lineFor(P1)}</div>
@@ -1186,44 +1438,38 @@
   function update(dt){
     if (game.state !== 'play') return;
 
+    // expire global effect
+    if (game.globalEffect.kind && nowMs() >= game.globalEffect.until) clearGlobal();
+
     updatePlayer(P1, dt);
     updatePlayer(P2, dt);
 
+    // spawn buffs
     game.buffSpawnTimer -= dt;
     if (game.buffSpawnTimer <= 0 && game.buffsOnMap.length < 4) {
       spawnBuff();
-      game.buffSpawnTimer = rand(6000, 10000);
+      game.buffSpawnTimer = rand(6000, 9500);
     }
 
     tryCollectBuff(P1);
     if (game.state !== 'play') return;
     tryCollectBuff(P2);
 
-    const overlap = (P1 && P2) ? aabb(P1,P2) : false;
-    if (overlap && !game.lastOverlap) {
-      const initiator = initiatorOfCollision(P1,P2);
-      const other = (initiator===P1)?P2:P1;
-
-      const push = 10;
-      if (initiator.x < other.x) { initiator.x -= push; other.x += push; }
-      else { initiator.x += push; other.x -= push; }
-
-      tryStartTagQuestion(initiator, other);
-    }
-    game.lastOverlap = overlap;
+    // reliable tag check
+    tryStartTagQuestion();
   }
 
   function render(t){
     ctx.globalAlpha = 1;
 
     if (game.level.theme === 'park') drawParkBG(t);
-    else drawSpaceBG(t);
+    else if (game.level.theme === 'space') drawSpaceBG(t);
+    else drawInvertedBG(t);
 
     drawPlatforms();
     drawLaunchPads();
     drawBuffs(t);
 
-    // Players always on top
     drawPlayer(P1);
     drawPlayer(P2);
 
@@ -1239,6 +1485,7 @@
       requestAnimationFrame(tick);
     } catch (err) {
       showFatal(err);
+      // stop loop
     }
   }
 
@@ -1247,15 +1494,15 @@
     showSplash(false);
     game.state = 'play';
     game.buffsOnMap = [];
-    game.buffSpawnTimer = rand(1400, 3200);
+    game.buffSpawnTimer = rand(1400, 2600);
     game.lastOverlap = false;
+    game.tagLatch = false;
+    clearGlobal();
     resetPlayers(false);
   }
 
   // ---------------- Boot ----------------
-  // ✅ KEY FIX: create players immediately so render never sees undefined
   resetPlayers(true);
-
   showSplash(true);
   requestAnimationFrame((t)=>{ game.lastT = t; tick(t); });
 
