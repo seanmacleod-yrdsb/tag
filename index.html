@@ -299,6 +299,20 @@
             </div>
           </div>
 
+          <div style="margin-top:12px;">
+            <h3 style="margin:0 0 10px;">Gameplay</h3>
+            <div class="row">
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label>Buffs</label>
+                <div class="seg" id="buffSeg"></div>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label>Cover objects</label>
+                <div class="seg" id="coverSeg"></div>
+              </div>
+            </div>
+          </div>
+
           <div style="margin-top:12px; opacity:.86; font-weight:800; font-size:12px; line-height:1.3;">
             One active effect at a time (new overrides).<br>
             Invert (harmful): correct → enemy gets it, wrong → you get it.
@@ -384,6 +398,8 @@
 
   const gradeSeg = document.getElementById('gradeSeg');
   const typeSeg  = document.getElementById('typeSeg');
+  const buffSeg  = document.getElementById('buffSeg');
+  const coverSeg = document.getElementById('coverSeg');
 
   const qOverlay = document.getElementById('qOverlay');
   const qPromptEl = document.getElementById('qPrompt');
@@ -742,6 +758,7 @@ floor,
 obstacles: [
   // In Inverted, players hang under platforms.
   // We align cover to the *bottom* of platforms (platform.y + platform.h) and extend downward.
+  // Kept intentionally LIGHT to reduce clutter.
 
   // Under left top platform (y:90,h:18 → bottom 108)
   { x: 170, y: 108, w: 84, h: 220, type:'pillar' },
@@ -752,17 +769,7 @@ obstacles: [
   // Under right top platform
   { x: W-170-84, y: 108, w: 84, h: 240, type:'pillar' },
 
-  // Under mid left (y:270,h:16 → bottom 286)
-  { x: 260, y: 286, w: 70, h: 180, type:'pillar' },
-
-  // Under mid right (y:310,h:16 → bottom 326)
-  { x: W-260-76, y: 326, w: 76, h: 180, type:'pillar' },
-
-  // Under center connectors (y:340,h:14 → bottom 354)
-  { x: (W/2)-220, y: 354, w: 64, h: 130, type:'pillar' },
-  { x: (W/2)+156, y: 354, w: 64, h: 130, type:'pillar' },
-
-  // Under staggered lower platforms
+  // Two lower pillars for endgame hideouts
   { x: (W/2)-330, y: 434, w: 64, h: 150, type:'pillar' }, // left lower (420+14)
   { x: (W/2)+280, y: 404, w: 64, h: 150, type:'pillar' }, // right higher (390+14)
 ],
@@ -780,6 +787,7 @@ buffIcons: {
     state: 'splash', // splash | play | question
     level: makeLevelPark(),
     config: { p1Color: "#39a9ff", p2Color: "#ff4b4b", grade:"Grade 5", qtype:"Numbers" },
+    options: { enableBuffs:true, enableCover:true },
     buffsOnMap: [],
     buffSpawnTimer: 0,
     lastOverlap: false,
@@ -808,6 +816,11 @@ buffIcons: {
   let pickedType = "Numbers";
   buildSeg(gradeSeg, GRADES, (x)=>pickedGrade=x, 1);
   buildSeg(typeSeg, QTYPES, (x)=>pickedType=x, 0);
+
+  let buffsEnabled = true;
+  let coverEnabled = true;
+  buildSeg(buffSeg, ['On','Off'], (x)=>buffsEnabled = (x==='On'), 0);
+  buildSeg(coverSeg,['On','Off'], (x)=>coverEnabled = (x==='On'), 0);
 
   let selectedLevel = "Park";
   function setLevelChoice(name){
@@ -1176,6 +1189,11 @@ buffIcons: {
     return BUFFS_BASE;
   }
 
+  function getActiveObstacles(){
+    if (!game.options || game.options.enableCover === false) return [];
+    return (game.level.obstacles || []);
+  }
+
   function weightedPick(items){
     const total = items.reduce((s,it)=>s+it.rarity,0);
     let r = Math.random()*total;
@@ -1190,13 +1208,14 @@ buffIcons: {
       const test = { x,y,w,h };
       let ok = true;
       for (const p of game.level.platforms) if (aabb(test,p)) { ok=false; break; }
-      for (const o of (game.level.obstacles||[])) if (aabb(test,o)) { ok=false; break; }
+      for (const o of getActiveObstacles()) if (aabb(test,o)) { ok=false; break; }
       if (ok) return { x,y };
     }
     return { x: (W/2)-w/2, y: 80 };
   }
 
   function spawnBuff(){
+    if (!game.options || game.options.enableBuffs === false) return;
     const all = buffsForLevel();
     const b = weightedPick(all);
 
@@ -1741,7 +1760,7 @@ function drawActors(){
   // Painter's algorithm: draw things from back-to-front based on their bottom edge.
   // This lets cover objects hide players naturally without "double-drawing" (no lighting up).
   const items = [];
-  const obs = (game.level.obstacles || []);
+  const obs = getActiveObstacles();
   for (const o of obs) items.push({ kind:'obs', z: o.y + o.h, obj: o });
   if (P1) items.push({ kind:'p', z: P1.y + P1.h, obj: P1 });
   if (P2) items.push({ kind:'p', z: P2.y + P2.h, obj: P2 });
@@ -1856,10 +1875,15 @@ function drawPlayer(p){
     updatePlayer(P2, dt);
 
     // spawn buffs
-    game.buffSpawnTimer -= dt;
-    if (game.buffSpawnTimer <= 0 && game.buffsOnMap.length < 4) {
-      spawnBuff();
-      game.buffSpawnTimer = rand(6000, 9500);
+    if (!game.options || game.options.enableBuffs === false) {
+      game.buffsOnMap = [];
+      game.buffSpawnTimer = 99999999;
+    } else {
+      game.buffSpawnTimer -= dt;
+      if (game.buffSpawnTimer <= 0 && game.buffsOnMap.length < 4) {
+        spawnBuff();
+        game.buffSpawnTimer = rand(6000, 9500);
+      }
     }
 
     tryCollectBuff(P1);
@@ -1925,9 +1949,12 @@ function drawCountdown(){
   // ---------------- Start Game ----------------
   function startGame(){
     showSplash(false);
+    // apply splash toggles
+    game.options.enableBuffs = !!buffsEnabled;
+    game.options.enableCover = !!coverEnabled;
     game.state = 'play';
     game.buffsOnMap = [];
-    game.buffSpawnTimer = rand(1400, 2600);
+    game.buffSpawnTimer = game.options.enableBuffs ? rand(1400, 2600) : 99999999;
     game.lastOverlap = false;
     game.tagLatch = false;
     clearGlobal();
