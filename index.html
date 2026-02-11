@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Math Tag: Park • Space • Inverted</title>
+  <title>Math Tag: Park • Space • Inverted • Storm</title>
   <style>
     html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     body { background: #06130b; overflow: hidden; }
@@ -111,8 +111,8 @@
     }
     .ddItem:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.10); }
 
-    .levels { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; }
-    @media (max-width: 900px){ .levels{ grid-template-columns: 1fr; } }
+    .levels { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width: 520px){ .levels{ grid-template-columns: 1fr; } }
 
     .levelCard {
       cursor:pointer; user-select:none;
@@ -136,6 +136,9 @@
                          radial-gradient(circle at 70% 60%, rgba(120,210,255,.40), transparent 60%); }
     .invArt { background: radial-gradient(circle at 30% 30%, rgba(255,160,80,.55), transparent 55%),
                       radial-gradient(circle at 70% 60%, rgba(255,80,150,.38), transparent 60%); }
+
+    .stormArt { background: radial-gradient(circle at 30% 30%, rgba(120,255,255,.55), transparent 55%),
+                        radial-gradient(circle at 70% 60%, rgba(255,90,200,.40), transparent 60%); }
 
     #startRow { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-top:14px; flex-wrap:wrap; }
     #startBtn {
@@ -233,6 +236,20 @@
       margin-top: 4px;
       color: rgba(255,255,255,.95);
     }
+
+    #windIcon{
+      margin-top: 2px;
+      font-size: 12px;
+      font-weight: 1000;
+      letter-spacing: .2px;
+      opacity: .92;
+      display:none;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+    }
+
 </style>
 </head>
 <body>
@@ -257,6 +274,7 @@
   <div class="panel" id="timerPanel">
     <div class="title">Elapsed</div>
     <div id="timerVal">0:00</div>
+    <div id="windIcon">💨 Wind: →</div>
   </div>
 
 <div id="wrap">
@@ -267,7 +285,7 @@
   <div class="overlay" id="splash">
     <div id="sCard">
       <div id="brandRow">
-        <div id="brand">🏷️✨ Math Tag <span id="badge">Park • Space • Inverted</span></div>
+        <div id="brand">🏷️✨ Math Tag <span id="badge">Park • Space • Inverted • Storm</span></div>
         <div style="opacity:.85; font-weight:1000; font-size:12px;">Single HTML</div>
       </div>
 
@@ -337,6 +355,12 @@
               <div class="levelTitle">🙃 Inverted</div>
               <div class="levelSub">Walk on undersides • weird gravity</div>
             </div>
+            <div class="levelCard" id="lvlStorm">
+              <div class="levelArt stormArt"></div>
+              <div class="levelTitle">🌧️ Storm</div>
+              <div class="levelSub">Neon city • wind + rain</div>
+            </div>
+
           </div>
 
           <div id="startRow">
@@ -395,6 +419,7 @@
   const lvlPark = document.getElementById('lvlPark');
   const lvlSpace = document.getElementById('lvlSpace');
   const lvlInv = document.getElementById('lvlInv');
+  const lvlStorm = document.getElementById('lvlStorm');
 
   const gradeSeg = document.getElementById('gradeSeg');
   const typeSeg  = document.getElementById('typeSeg');
@@ -414,6 +439,7 @@
   const errTextEl = document.getElementById('errText');
 
   const timerValEl = document.getElementById('timerVal');
+  const windIconEl = document.getElementById('windIcon');
   const timerPanelEl = document.getElementById('timerPanel');
 
   // ---------------- Constants ----------------
@@ -579,9 +605,11 @@
     ];
     const platforms = [
       ground,
+      { x: 0, y: H-360, w: 220, h: 16 },
+      { x: W-220, y: H-360, w: 220, h: 16 },
       { x: 160, y: H-170, w: 220, h: 20 },
       { x: W-160-220, y: H-170, w: 220, h: 20 },
-      { x: (W/2)-170, y: H-270, w: 340, h: 22 },
+      { x: (W/2)-170, y: H-270, w: 340, h: 22, kind:'ice' },
       { x: 170, y: H-360, w: 210, h: 20 },
       { x: W-170-210, y: H-360, w: 210, h: 20 },
       { x: (W/2)-120, y: H-450, w: 240, h: 18 },
@@ -609,7 +637,7 @@ obstacles: [
   { x: W*0.82, y: H-groundH-150, w: 62,  h: 150, type:'tree' },
 
   // Epic big tree: spans most of the canvas
-  { x: W*0.52-90, y: H-groundH-520, w: 180, h: 520, type:'bigTree' },
+  { x: W*0.52-130, y: H-groundH-600, w: 260, h: 600, type:'bigTree', noClamp:true },
 
   // Platform cover (non-solid, just visual occlusion)
   // Left lower platform (y: H-170)
@@ -640,9 +668,11 @@ buffIcons: {
     ];
     const platforms = [
       ground,
+      { x: 0, y: H-360, w: 220, h: 14 },
+      { x: W-220, y: H-360, w: 220, h: 14 },
       { x: (W/2)-320, y: H-190, w: 260, h: 18 },
       { x: (W/2)+60,  y: H-190, w: 260, h: 18 },
-      { x: (W/2)-140, y: H-285, w: 280, h: 18 },
+      { x: (W/2)-140, y: H-285, w: 280, h: 18, kind:'ice' },
       { x: 220, y: H-360, w: 180, h: 16 },
       { x: W-220-180, y: H-360, w: 180, h: 16 },
       { x: (W/2)-380, y: H-440, w: 200, h: 16 },
@@ -677,7 +707,7 @@ obstacles: [
   { x: (W/2)+180, y: (H-190)-86, w: 72, h: 86, type:'crate' },
 
   // Mid platform (y: H-285)
-  { x: (W/2)-34, y: (H-285)-120, w: 120, h: 120, type:'planet' },
+  { x: W-220, y: 60, w: 180, h: 180, type:'planet', noClamp:true },
 
   // Higher platforms
   { x: 250, y: (H-360)-86, w: 72, h: 86, type:'crate' },
@@ -713,7 +743,7 @@ floor,
 { x: W-130-260, y: 90, w: 260, h: 18 },
 
 // Wide central anchor
-{ x: (W/2)-260, y: 180, w: 520, h: 20 },
+{ x: (W/2)-260, y: 180, w: 520, h: 20, kind:'ice' },
 
 // Mid layer (staggered for easier chaining)
 { x: 170, y: 270, w: 230, h: 16 },            // left: a bit higher
@@ -782,10 +812,84 @@ buffIcons: {
     };
   }
 
+  
+  function makeLevelStorm(){
+    const groundH = 46;
+    const ground = { x: 0, y: H-groundH, w: W, h: groundH, kind:'ground' };
+    const pads = [
+      { x: 14, y: H-groundH-14, w: 80, h: 14, dir:'up' },
+      { x: W-14-80, y: H-groundH-14, w: 80, h: 14, dir:'up' },
+    ];
+
+    const platforms = [
+      ground,
+      { x: 0, y: H-340, w: 220, h: 14 },
+      { x: W-220, y: H-340, w: 220, h: 14 },
+      { x: 140, y: H-170, w: 240, h: 18 },
+      { x: W-140-240, y: H-170, w: 240, h: 18 },
+      // Slick “wet” rooftop catwalk
+      { x: (W/2)-220, y: H-245, w: 440, h: 18, kind:'ice' },
+
+      { x: 190, y: H-340, w: 200, h: 16 },
+      { x: W-190-200, y: H-340, w: 200, h: 16 },
+
+      { x: (W/2)-360, y: H-430, w: 220, h: 16 },
+      { x: (W/2)+140, y: H-430, w: 220, h: 16 },
+
+      { x: (W/2)-120, y: H-520, w: 240, h: 14 },
+    ];
+
+    return {
+      name: "Storm",
+      theme: "storm",
+      gravity: 1350,
+      maxFall: 940,
+      baseJump: 520,
+      baseSpeed: 252,
+      horizInvert: false,
+      groundH,
+      pads,
+      platforms,
+      obstacles: [
+        // All cover objects: clamp later to player height, so these are “suggested” sizes.
+        { x: W*0.12, y: H-groundH-120, w: 120, h: 120, type:'neonSign' },
+        { x: W*0.80, y: H-groundH-110, w: 110, h: 110, type:'neonSign' },
+        { x: (W/2)-44, y: (H-170)-92, w: 96, h: 92, type:'vent' },
+        { x: (W/2)+260, y: (H-430)-92, w: 92, h: 92, type:'vent' },
+      ],
+      buffIcons: {
+        speed:'⚡', jump:'🦘', both:'✨',
+        swapIt:'👑', invert:'🔁', teleport:'🌀', slowEnemy:'🧊', invis:'👻'
+      }
+    };
+  }
+
+
+  function clampCoverObjects(level){
+  if (!level || !Array.isArray(level.obstacles)) return level;
+  const maxH = 46; // character height (most cover)
+  const inv = (level.theme === 'inverted');
+
+  // Some special “hero” cover pieces are allowed to be larger:
+  // - Park: bigTree
+  // - Space: planet
+  level.obstacles = level.obstacles.map(o=>{
+    if (!o) return o;
+    if (o.noClamp || o.type === 'bigTree' || o.type === 'planet') return o;
+
+    const oh = Math.max(6, Number(o.h||0));
+    const nh = Math.min(maxH, oh);
+    const dy = inv ? 0 : (oh - nh); // keep bottoms aligned (normal levels)
+    return { ...o, h: nh, y: (o.y||0) + dy };
+  });
+
+  return level;
+}
+
   // ---------------- Game State ----------------
   const game = {
     state: 'splash', // splash | play | question
-    level: makeLevelPark(),
+    level: clampCoverObjects(makeLevelPark()),
     config: { p1Color: "#39a9ff", p2Color: "#ff4b4b", grade:"Grade 5", qtype:"Numbers" },
     options: { enableBuffs:true, enableCover:true },
     buffsOnMap: [],
@@ -796,7 +900,8 @@ buffIcons: {
     tagLatch: false,
     startTimeMs: 0,
     headstartUntil: 0,
-    headstartItId: ''
+    headstartItId: '',
+    wind: { dir: 0, v: 0, targetV: 0, nextChange: 0, gustUntil: 0 }
   };
 
   function globalActive(kind){
@@ -828,16 +933,19 @@ buffIcons: {
     lvlPark.classList.toggle('active', name === "Park");
     lvlSpace.classList.toggle('active', name === "Space");
     lvlInv.classList.toggle('active', name === "Inverted");
+    lvlStorm.classList.toggle('active', name === "Storm");
   }
   lvlPark.addEventListener('click', ()=>setLevelChoice("Park"));
   lvlSpace.addEventListener('click', ()=>setLevelChoice("Space"));
   lvlInv.addEventListener('click', ()=>setLevelChoice("Inverted"));
+  lvlStorm.addEventListener('click', ()=>setLevelChoice("Storm"));
   setLevelChoice("Park");
 
   // Double-click a level card to start immediately (Start button still works)
   lvlPark.addEventListener('dblclick', () => { setLevelChoice("Park"); startBtn.click(); });
   lvlSpace.addEventListener('dblclick', () => { setLevelChoice("Space"); startBtn.click(); });
   lvlInv.addEventListener('dblclick', () => { setLevelChoice("Inverted"); startBtn.click(); });
+  lvlStorm.addEventListener('dblclick', () => { setLevelChoice("Storm"); startBtn.click(); });
 
 
   const p1DD = makeColorDropdown(document.getElementById('p1DD'), "Blue");
@@ -857,8 +965,10 @@ buffIcons: {
     game.config = { p1Color: p1DD.value, p2Color: p2DD.value, grade: pickedGrade, qtype: pickedType };
     if (selectedLevel === "Space") game.level = makeLevelSpace();
     else if (selectedLevel === "Inverted") game.level = makeLevelInverted();
+    else if (selectedLevel === "Storm") game.level = makeLevelStorm();
     else game.level = makeLevelPark();
 
+    clampCoverObjects(game.level);
     resetPlayers(true);
     startGame();
   });
@@ -878,7 +988,9 @@ buffIcons: {
       tagCooldown: 0,
       effect: { kind: null, until: 0 },
       _jumpHeld: false,
-      _launchCD: 0
+      _launchCD: 0,
+      _onPlat: null,
+      _onIce: false
     };
   }
 
@@ -925,6 +1037,8 @@ buffIcons: {
           m.vy = 0;
           m.onGround = true;
           m.jumpsLeft = 2;
+          m._onPlat = s;
+          m._onPlat = s;
         } else {
           if (m.vy < 0) m.vy = 0;
         }
@@ -936,6 +1050,7 @@ buffIcons: {
           m.vy = 0;
           m.onGround = true;
           m.jumpsLeft = 2;
+          m._onPlat = s;
         } else {
           if (m.vy > 0) m.vy = 0;
         }
@@ -991,6 +1106,7 @@ buffIcons: {
     if (!p) return;
 
     p.onGround = false;
+    p._onPlat = null;
     p.tagCooldown = Math.max(0, p.tagCooldown - dt);
     p._launchCD = Math.max(0, p._launchCD - dt);
 
@@ -1009,9 +1125,27 @@ buffIcons: {
     if (right) move += 1;
     move *= invDebuff * invLevel;
 
-    const targetVx = move * speedFor(p);
-    const accel = 2200;
-    p.vx += clamp(targetVx - p.vx, -accel*(dt/1000), accel*(dt/1000));
+    // Horizontal movement + ice physics
+    // NOTE: p._onIce reflects LAST frame; we update it after collisions below.
+    const onIcePrev = !!p._onIce;
+
+    // On ice: a bit faster top speed, and MUCH more momentum (slow decel).
+    const speed = speedFor(p) * (onIcePrev ? 1.45 : 1.0);
+    const targetVx = move * speed;
+
+    // Faster acceleration so ice doesn't feel sluggish, but very low decel when you stop.
+    const accel = onIcePrev ? 3000 : 2200;
+    const decel = onIcePrev ? 220 : 2600;
+    const a = (move === 0) ? decel : accel;
+
+    p.vx += clamp(targetVx - p.vx, -a*(dt/1000), a*(dt/1000));
+
+    // Extra glide: when you're not pressing anything on ice, keep coasting.
+    if (onIcePrev && move === 0) {
+      const keep = Math.pow(0.985, dt/16.67); // ~1.5% loss per frame @60fps
+      p.vx *= keep;
+    }
+
     if (frozenByHeadstart) { p.vx *= 0.80; }
     if (move !== 0) p.facing = Math.sign(move);
 
@@ -1049,6 +1183,29 @@ buffIcons: {
     for (const plat of (game.level.platforms)) {
       if (aabb(p, plat)) resolveAABB(p, plat, gravS);
     }
+
+    p._onIce = !!(p.onGround && p._onPlat && p._onPlat.kind === 'ice');
+
+// Storm wind: apply as a real physics force so it's unmistakable.
+    // We do this AFTER platform collisions (so you still "stick" to surfaces),
+    // but BEFORE safety clamps / launchpads.
+    if (game.level.theme === 'storm' && game.wind) {
+      const dir = game.wind.dir || 0;
+      const v = game.wind.v || 0; // px/s (signed later)
+      // Treat v as a wind *velocity* and blend it into player motion.
+      // Stronger in air; still noticeable on ground.
+      const windVelRaw = dir * v * (p.onGround ? 0.55 : 1.15);
+// cap so gusts feel strong but fair
+const windVel = clamp(windVelRaw, -260, 260);
+
+// Add a gentle drift so it's always felt.
+p.x += windVel * (dt/1000) * 0.55;
+
+// Bias vx toward wind to create "carried" feeling (stronger in air).
+const follow = p.onGround ? 0.08 : 0.12;
+p.vx += (windVel - p.vx) * follow;
+    }
+
 
     // safety clamps (keep in map)
     if (p.y < -20) { p.y = -20; p.vy = 0; }
@@ -1518,11 +1675,110 @@ ctx.restore();
     ctx.restore();
   }
 
-  function drawPlatforms(){
+  
+  function drawStormBG(t){
+    // Dark stormy sky + neon haze
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#070a24');
+    g.addColorStop(0.55,'#0b0f34');
+    g.addColorStop(1,'#060816');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    // Neon haze blobs
+    function blob(x,y,r,c){
+      ctx.save();
+      ctx.globalAlpha=0.22;
+      const grd=ctx.createRadialGradient(x,y,0,x,y,r);
+      grd.addColorStop(0,c);
+      grd.addColorStop(1,'transparent');
+      ctx.fillStyle=grd;
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+    blob(W*0.22,H*0.22,240,'rgba(80,160,255,.95)');
+    blob(W*0.72,H*0.30,280,'rgba(180,110,255,.88)');
+    blob(W*0.55,H*0.18,200,'rgba(255,220,120,.75)');
+
+    // City skyline silhouettes
+    ctx.save();
+    ctx.globalAlpha = 0.28;
+    ctx.fillStyle = '#05070f';
+    const baseY = H*0.70;
+    for (let i=0;i<22;i++){
+      const bw = 26 + ((i*41)%46);
+      const bh = 70 + ((i*63)%160);
+      const bx = (i/22)*W + ((i*19)%24) - 10;
+      ctx.fillRect(bx, baseY-bh, bw, bh);
+      // neon windows
+      ctx.globalAlpha = 0.14;
+      ctx.fillStyle = (i%3===0) ? 'rgba(120,255,255,.55)' : (i%3===1 ? 'rgba(255,90,200,.45)' : 'rgba(255,230,120,.35)');
+      for (let wy=baseY-bh+14; wy<baseY-12; wy+=18){
+        ctx.fillRect(bx+6, wy, 4, 7);
+        ctx.fillRect(bx+14, wy, 4, 7);
+      }
+      ctx.globalAlpha = 0.28;
+      ctx.fillStyle = '#05070f';
+    }
+    ctx.restore();
+
+    // Clouds
+    ctx.save();
+    ctx.globalAlpha = 0.16;
+    ctx.fillStyle = '#ffffff';
+    const cx = (t/55)% (W+260) - 130;
+    roundedRect(cx, 90, 320, 70, 40); ctx.fill();
+    roundedRect(cx+210, 70, 360, 88, 46); ctx.fill();
+    roundedRect(cx+520, 100, 300, 64, 40); ctx.fill();
+    ctx.restore();
+
+    // Rain
+    ctx.save();
+    ctx.globalAlpha = 0.20;
+    ctx.strokeStyle = 'rgba(120,255,255,.65)';
+    ctx.lineWidth = 2;
+    for (let i=0;i<120;i++){
+      const x = (i*97 + t*0.35) % (W+60) - 30;
+      const y = (i*53 + t*0.75) % (H+60) - 60;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x-10, y+26);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Ground strip
+    ctx.fillStyle='rgba(10,10,22,.92)';
+    ctx.fillRect(0, H-game.level.groundH, W, game.level.groundH);
+
+    // Big faint label
+    ctx.save();
+    ctx.globalAlpha = 0.10;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 90px system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('STORM', W/2, 120);
+    ctx.restore();
+  }
+
+
+function drawPlatforms(){
     for (const p of game.level.platforms) {
       if (p.kind === 'ground' || p.kind === 'ceiling') continue;
 
-      if (game.level.theme === 'park') {
+      if (p.kind === 'ice') {
+        // slick platform
+        if (game.level.theme === 'space') ctx.fillStyle='rgba(140,210,255,.60)';
+        else if (game.level.theme === 'storm') ctx.fillStyle='rgba(80,160,255,.40)';
+        else if (game.level.theme === 'inverted') ctx.fillStyle='rgba(255,200,120,.38)';
+        else ctx.fillStyle='rgba(120,220,170,.40)';
+        roundedRect(p.x,p.y,p.w,p.h,12); ctx.fill();
+        ctx.save();
+        ctx.globalAlpha = 0.45;
+        ctx.fillStyle = 'rgba(255,255,255,.35)';
+        roundedRect(p.x+6, p.y+3, p.w-12, Math.max(3, p.h*0.32), 10); ctx.fill();
+        ctx.restore();
+      } else if (game.level.theme === 'park') {
         ctx.fillStyle='rgba(35,160,80,.95)';
         roundedRect(p.x,p.y,p.w,p.h,10); ctx.fill();
         ctx.fillStyle='rgba(255,255,255,.12)';
@@ -1533,6 +1789,16 @@ ctx.restore();
         ctx.fillStyle='rgba(255,255,255,.10)';
         roundedRect(p.x,p.y,p.w,Math.max(6,p.h*0.35),10); ctx.fill();
         ctx.strokeStyle='rgba(170,120,255,.30)';
+        ctx.lineWidth=2;
+        ctx.strokeRect(p.x+1,p.y+1,p.w-2,p.h-2);
+        ctx.lineWidth=1;
+      } else if (game.level.theme === 'storm') {
+        // neon rooftop platforms
+        ctx.fillStyle='rgba(80,160,255,.26)';
+        roundedRect(p.x,p.y,p.w,p.h,10); ctx.fill();
+        ctx.fillStyle='rgba(180,110,255,.10)';
+        roundedRect(p.x,p.y,p.w,Math.max(6,p.h*0.35),10); ctx.fill();
+        ctx.strokeStyle='rgba(255,220,120,.28)';
         ctx.lineWidth=2;
         ctx.strokeRect(p.x+1,p.y+1,p.w-2,p.h-2);
         ctx.lineWidth=1;
@@ -1738,8 +2004,55 @@ ctx.restore();
 
       ctx.lineWidth = 1;
     }
+} else if (game.level.theme === 'storm') {
+  // Storm cover: neon purple/yellow pieces (opaque enough to hide behind)
+  if (o.type === 'neonSign') {
+    // Purple sign body
+    ctx.fillStyle = 'rgba(170,90,255,.95)';
+    roundedRect(o.x, o.y, o.w, o.h, 16); ctx.fill();
+
+    // Yellow glow strip
+    ctx.globalAlpha *= 0.95;
+    ctx.fillStyle = 'rgba(255,230,120,.95)';
+    roundedRect(o.x+10, o.y+12, o.w-20, Math.max(10, o.h*0.18), 999); ctx.fill();
+
+    // Neon edge
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = 'rgba(120,210,255,.75)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(o.x+2, o.y+2, o.w-4, o.h-4);
+    ctx.lineWidth = 1;
+
+  } else if (o.type === 'vent') {
+    // Violet metal vent with yellow highlights
+    ctx.fillStyle = 'rgba(90,120,255,.55)';
+    roundedRect(o.x, o.y, o.w, o.h, 14); ctx.fill();
+
+    ctx.globalAlpha *= 0.9;
+    ctx.fillStyle = 'rgba(255,230,120,.75)';
+    for (let i=0;i<4;i++){
+      const yy = o.y + 10 + i*(o.h-20)/3;
+      roundedRect(o.x+10, yy, o.w-20, 6, 6); ctx.fill();
+    }
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = 'rgba(180,110,255,.70)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(o.x+2, o.y+2, o.w-4, o.h-4);
+    ctx.lineWidth = 1;
+
   } else {
-    // Inverted pillar (opaque)
+    // fallback neon pillar
+    ctx.fillStyle = 'rgba(170,90,255,.80)';
+    roundedRect(o.x, o.y, o.w, o.h, 14); ctx.fill();
+    ctx.globalAlpha *= 0.22;
+    ctx.fillStyle = 'rgba(255,230,120,.65)';
+    roundedRect(o.x+8, o.y+12, o.w-16, o.h-24, 12); ctx.fill();
+    ctx.globalAlpha = alpha;
+  }
+
+} else {
+  // Inverted pillar (opaque)
+
     ctx.fillStyle = '#ff8c4a';
     roundedRect(o.x, o.y, o.w, o.h, 14); ctx.fill();
     ctx.globalAlpha *= 0.20;
@@ -1784,23 +2097,23 @@ function drawPlayer(p){
 
     ctx.save();
 
-
     const invis = (effectKind(p) === 'invis');
-    if (invis) ctx.globalAlpha = 0.18;
+    const bodyA = invis ? 0.18 : 1.0;
 
-    // glow
-    ctx.globalAlpha = 0.18;
+    // glow (faint when invisible)
+    ctx.globalAlpha = invis ? 0.10 : 0.18;
     ctx.fillStyle = '#fff';
     ctx.beginPath();
     ctx.arc(p.x+p.w/2, p.y+p.h/2, 26, 0, Math.PI*2);
     ctx.fill();
-    ctx.globalAlpha = 1;
 
     // body
+    ctx.globalAlpha = bodyA;
     ctx.fillStyle = p.color;
     roundedRect(p.x,p.y,p.w,p.h,10); ctx.fill();
 
     // outline
+    ctx.globalAlpha = bodyA;
     ctx.strokeStyle='rgba(0,0,0,.65)';
     ctx.lineWidth=3;
     ctx.strokeRect(p.x+0.5,p.y+0.5,p.w-1,p.h-1);
@@ -1811,19 +2124,18 @@ function drawPlayer(p){
     const eyeY = p.y + 16;
     ctx.beginPath(); ctx.arc(eyeX,eyeY,3,0,Math.PI*2); ctx.fill();
 
-    // IT border
-    if (p.isIt && !invis) {
-      ctx.strokeStyle='rgba(255,215,80,.98)';
-      ctx.lineWidth=4;
-      ctx.strokeRect(p.x-3,p.y-3,p.w+6,p.h+6);
-    }
-
-    // label
+    // IT border + label (hide when invisible)
     if (!invis) {
+      if (p.isIt) {
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle='rgba(255,215,80,.98)';
+        ctx.lineWidth=4;
+        ctx.strokeRect(p.x-3,p.y-3,p.w+6,p.h+6);
+      }
       ctx.font='900 12px system-ui';
-    ctx.textAlign='center'; ctx.textBaseline='bottom';
-    ctx.fillStyle='rgba(255,255,255,.95)';
-    ctx.fillText(p.id, p.x+p.w/2, p.y-6);
+      ctx.textAlign='center'; ctx.textBaseline='bottom';
+      ctx.fillStyle='rgba(255,255,255,.95)';
+      ctx.fillText(p.id, p.x+p.w/2, p.y-6);
     }
 
     ctx.restore();
@@ -1870,11 +2182,56 @@ function drawPlayer(p){
 
     // expire global effect
     if (game.globalEffect.kind && nowMs() >= game.globalEffect.until) clearGlobal();
+    // Storm wind (noticeable, but not ridiculous)
+    if (game.level.theme === 'storm') {
+      const n = nowMs();
+      if (!game.wind) game.wind = { dir: 0, v: 0, targetV: 0, nextChange: 0, gustUntil: 0 };
+      if (!Number.isFinite(game.wind.v)) game.wind.v = 0;
+      if (!Number.isFinite(game.wind.targetV)) game.wind.targetV = 0;
 
-    updatePlayer(P1, dt);
+      // Direction changes every couple seconds (sometimes calm)
+      if (!game.wind.nextChange || n >= game.wind.nextChange) {
+        const r = Math.random();
+        game.wind.dir = (r < 0.36) ? -1 : (r < 0.72 ? 1 : 0);
+
+        // Base breeze speed (px/s). Typical walk speed is ~250 px/s.
+        // We keep wind as a smaller, persistent influence.
+        const base = (game.wind.dir === 0) ? rand(0, 25) : rand(45, 120);
+        game.wind.targetV = base;
+
+        // next change
+        game.wind.nextChange = n + rand(1200, 2400);
+
+        // occasional gust bursts (adds some chaos)
+        if (game.wind.dir !== 0 && Math.random() < 0.45) {
+          game.wind.gustUntil = n + rand(450, 900);
+        } else {
+          game.wind.gustUntil = 0;
+        }
+      }
+
+      // gust boosts target temporarily
+      let tgt = game.wind.targetV;
+      if (game.wind.gustUntil && n < game.wind.gustUntil) {
+        tgt += rand(80, 220);
+      }
+
+      // small jitter so it feels alive
+      tgt += (Math.random() - 0.5) * 18;
+
+      // smoothly move current wind toward target (dt is ms)
+      const lerp = 1 - Math.pow(0.004, dt); // responsive but not snappy
+      game.wind.v = game.wind.v + (tgt - game.wind.v) * lerp;
+    } else if (game.wind) {
+      game.wind.dir = 0;
+      game.wind.v = 0;
+      game.wind.targetV = 0;
+      game.wind.nextChange = 0;
+      game.wind.gustUntil = 0;
+    }
+updatePlayer(P1, dt);
     updatePlayer(P2, dt);
-
-    // spawn buffs
+// spawn buffs
     if (!game.options || game.options.enableBuffs === false) {
       game.buffsOnMap = [];
       game.buffSpawnTimer = 99999999;
@@ -1921,7 +2278,22 @@ function drawCountdown(){
 
     if (game.level.theme === 'park') drawParkBG(t);
     else if (game.level.theme === 'space') drawSpaceBG(t);
+    else if (game.level.theme === 'storm') drawStormBG(t);
     else drawInvertedBG(t);
+
+    // wind icon
+    if (windIconEl) {
+      if (game.level.theme === 'storm' && game.state === 'play') {
+        const d = (game.wind && game.wind.dir) ? game.wind.dir : 0;
+        windIconEl.style.display = 'inline-flex';
+        const v = (game.wind && game.wind.v) ? game.wind.v : 0;
+        const mag = Math.min(3, Math.floor(v/160));
+        const bars = (d===0) ? '' : ' ' + '▮'.repeat(Math.max(1,mag));
+        windIconEl.textContent = (d === 0) ? '🌀 Wind: calm' : (d < 0 ? '💨 Wind: ←' : '💨 Wind: →') + bars;
+      } else {
+        windIconEl.style.display = 'none';
+      }
+    }
 
     drawPlatforms();
     drawLaunchPads();
